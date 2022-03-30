@@ -1,0 +1,34 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+
+  clean:
+    desc: Delete build artifacts
+    cmds: [rm -rf bin/*]
+
+  examples:
+    desc: Build all the examples
+    cmds:
+      - go build -o bin/arguments        ./examples/arguments/
+      - go build -o bin/calculator       ./examples/calculator/
+      - go build -o bin/config_file      ./examples/config_file/
+      - go build -o bin/counted          ./examples/counted/
+      - go build -o bin/fake-git         ./examples/fake-git/
+      - go build -o bin/naval_fate       ./examples/naval_fate/
+      - go build -o bin/odd_even         ./examples/odd_even/
+      - go build -o bin/options          ./examples/options/
+      - go build -o bin/options_shortcut ./examples/options_shortcut/
+      - go build -o bin/quick            ./examples/quick/
+      - go build -o bin/type_assert      ./examples/type_assert/
+
+  test:
+    desc: Run the tests
+    cmds:
+      - "{{.TESTRUNNER}} ./..."
+  # ??? examples/unit_test/
+    vars:
+      GOTESTSUM:
+        sh: if which gotestsum > /dev/null; then echo gotestsum; fi
+      TESTRUNNER: "{{if .GOTESTSUM}}{{.GOTESTSUM}}{{else}}go test{{end}}"

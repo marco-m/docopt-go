@@ -1,9 +1,8 @@
 docopt-go
 =========
 
-[![Build Status](https://travis-ci.org/docopt/docopt.go.svg?branch=master)](https://travis-ci.org/docopt/docopt.go)
-[![Coverage Status](https://coveralls.io/repos/github/docopt/docopt.go/badge.svg)](https://coveralls.io/github/docopt/docopt.go)
-[![GoDoc](https://godoc.org/github.com/docopt/docopt.go?status.svg)](https://godoc.org/github.com/docopt/docopt.go)
+NOTE: This is a fork of https://github.com/docopt/docopt.go
+
 
 An implementation of [docopt](http://docopt.org/) in the [Go](http://golang.org/) programming language.
 
@@ -14,7 +13,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/docopt/docopt-go"
+	"github.com/marco-m/docopt-go"
 )
 
 func main() {
@@ -44,16 +43,16 @@ Options:
 
 ## Installation
 
-⚠ Use the alias "docopt-go". To use docopt in your Go code:
+To use docopt in your Go code:
 
 ```go
-import "github.com/docopt/docopt-go"
+import "github.com/marco-m/docopt-go"
 ```
 
-To install docopt in your `$GOPATH`:
+To install this fork:
 
 ```console
-$ go get github.com/docopt/docopt-go
+$ go get github.com/marco-m/docopt-go
 ```
 
 ## API
@@ -103,7 +102,7 @@ var config struct {
 opts.Bind(&config)
 ```
 
-More documentation is available at [godoc.org](https://godoc.org/github.com/docopt/docopt-go).
+More documentation is available at [godoc.org](https://pkg.go.dev/github.com/marco-m/docopt-go).
 
 ## Unit Testing
 

@@ -8,7 +8,7 @@ tasks:
     desc: Delete build artifacts
     cmds: [rm -rf bin/*]
 
-  examples:
+  build:examples:
     desc: Build all the examples
     cmds:
       - go build -o bin/arguments        ./examples/arguments/
@@ -26,9 +26,9 @@ tasks:
   test:
     desc: Run the tests
     cmds:
-      - "{{.TESTRUNNER}} ./..."
-  # ??? examples/unit_test/
-    vars:
-      GOTESTSUM:
-        sh: if which gotestsum > /dev/null; then echo gotestsum; fi
-      TESTRUNNER: "{{if .GOTESTSUM}}{{.GOTESTSUM}}{{else}}go test{{end}}"
+      - go test -count=1 -short -coverprofile=bin/coverage.out -json ./... | tparse -skip
+
+  browser:
+    desc: "Show code coverage in browser (usage: task test:<subtarget> browser)"
+    cmds:
+      - go tool cover -html=bin/coverage.out

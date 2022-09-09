@@ -8,7 +8,7 @@ import (
 
 type tokenList struct {
 	tokens    []string
-	errorFunc func(string, ...interface{}) error
+	errorFunc func(string, ...any) error
 	err       errorType
 }
 type token string

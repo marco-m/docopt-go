@@ -69,7 +69,7 @@ type pattern struct {
 	children patternList
 
 	name  string
-	value interface{}
+	value any
 
 	short    string
 	long     string
@@ -108,7 +108,7 @@ func newOptionsShortcut() *pattern {
 	return &p
 }
 
-func newLeafPattern(t patternType, name string, value interface{}) *pattern {
+func newLeafPattern(t patternType, name string, value any) *pattern {
 	// default: value=nil
 	var p pattern
 	p.t = t
@@ -117,12 +117,12 @@ func newLeafPattern(t patternType, name string, value interface{}) *pattern {
 	return &p
 }
 
-func newArgument(name string, value interface{}) *pattern {
+func newArgument(name string, value any) *pattern {
 	// default: value=nil
 	return newLeafPattern(patternArgument, name, value)
 }
 
-func newCommand(name string, value interface{}) *pattern {
+func newCommand(name string, value any) *pattern {
 	// default: value=false
 	var p pattern
 	p.t = patternCommand
@@ -131,7 +131,7 @@ func newCommand(name string, value interface{}) *pattern {
 	return &p
 }
 
-func newOption(short, long string, argcount int, value interface{}) *pattern {
+func newOption(short, long string, argcount int, value any) *pattern {
 	// default: "", "", 0, false
 	var p pattern
 	p.t = patternOption
@@ -320,7 +320,7 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 		return false, left, collected
 	} else if p.t&patternLeaf != 0 {
 		pos, match := p.singleMatch(left)
-		var increment interface{}
+		var increment any
 		if match == nil {
 			return false, left, collected
 		}
@@ -541,8 +541,8 @@ func (pl *patternList) remove(p *pattern) {
 	(*pl) = pl.diff(patternList{p})
 }
 
-func (pl patternList) dictionary() map[string]interface{} {
-	dict := make(map[string]interface{})
+func (pl patternList) dictionary() map[string]any {
+	dict := make(map[string]any)
 	for _, a := range pl {
 		dict[a.name] = a.value
 	}

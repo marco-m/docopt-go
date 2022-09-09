@@ -1129,7 +1129,7 @@ func TestAllowDoubleDash(t *testing.T) {
 		t.Error(err)
 	}
 	_, err := testParser.ParseArgs("usage: prog [-o] <arg>\noptions:-o", []string{"-o"}, "")
-	if _, ok := err.(*UserError); !ok { //"--" is not allowed; FIXME?
+	if _, ok := err.(*UserError); !ok { // "--" is not allowed; FIXME?
 		t.Error(err)
 	}
 }
@@ -1454,7 +1454,7 @@ func parseTest(raw []byte) ([]testcase, error) {
 			if len(argvString) > 0 {
 				argv = strings.Fields(argvString)
 			}
-			var expectUntyped interface{}
+			var expectUntyped any
 			err := json.Unmarshal([]byte(expectString), &expectUntyped)
 			if err != nil {
 				return nil, err
@@ -1462,12 +1462,12 @@ func parseTest(raw []byte) ([]testcase, error) {
 			switch expect := expectUntyped.(type) {
 			case string: // user-error
 				res = append(res, testcase{id, doc, prog, argv, nil, true})
-			case map[string]interface{}:
-				// convert []interface{} values to []string
+			case map[string]any:
+				// convert []any values to []string
 				// convert float64 values to int
 				for k, vUntyped := range expect {
 					switch v := vUntyped.(type) {
-					case []interface{}:
+					case []any:
 						itemList := make([]string, len(v))
 						for i, itemUntyped := range v {
 							if item, ok := itemUntyped.(string); ok {
@@ -1503,16 +1503,16 @@ func parseOutput(doc string, argv []string, help bool, version string, optionsFi
 
 var debugEnabled = false
 
-func debugOn(l ...interface{}) {
+func debugOn(l ...any) {
 	debugEnabled = true
 	debug(l...)
 }
-func debugOff(l ...interface{}) {
+func debugOff(l ...any) {
 	debug(l...)
 	debugEnabled = false
 }
 
-func debug(l ...interface{}) {
+func debug(l ...any) {
 	if debugEnabled {
 		fmt.Println(l...)
 	}

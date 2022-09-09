@@ -30,7 +30,7 @@ type UserError struct {
 func (e UserError) Error() string {
 	return e.msg
 }
-func newUserError(msg string, f ...interface{}) error {
+func newUserError(msg string, f ...any) error {
 	return &UserError{fmt.Sprintf(msg, f...), ""}
 }
 
@@ -42,7 +42,7 @@ type LanguageError struct {
 func (e LanguageError) Error() string {
 	return e.msg
 }
-func newLanguageError(msg string, f ...interface{}) error {
+func newLanguageError(msg string, f ...any) error {
 	return &LanguageError{fmt.Sprintf(msg, f...)}
 }
 

@@ -71,7 +71,7 @@ func (p *Parser) ParseArgs(doc string, argv []string, version string) (Opts, err
 
 // Deprecated: Parse is provided for backward compatibility with the original docopt.go package.
 // Please rather make use of ParseDoc, ParseArgs, or use your own custom Parser.
-func Parse(doc string, argv []string, help bool, version string, optionsFirst bool, exit ...bool) (map[string]interface{}, error) {
+func Parse(doc string, argv []string, help bool, version string, optionsFirst bool, exit ...bool) (map[string]any, error) {
 	exitOk := true
 	if len(exit) > 0 {
 		exitOk = exit[0]
@@ -88,7 +88,7 @@ func Parse(doc string, argv []string, help bool, version string, optionsFirst bo
 	return p.parse(doc, argv, version)
 }
 
-func (p *Parser) parse(doc string, argv []string, version string) (map[string]interface{}, error) {
+func (p *Parser) parse(doc string, argv []string, version string) (map[string]any, error) {
 	if argv == nil {
 		argv = os.Args[1:]
 	}
@@ -109,7 +109,7 @@ func (p *Parser) parse(doc string, argv []string, version string) (map[string]in
 // -----------------------------------------------------------------------------
 
 // parse and return a map of args, output and all errors
-func parse(doc string, argv []string, help bool, version string, optionsFirst bool) (args map[string]interface{}, output string, err error) {
+func parse(doc string, argv []string, help bool, version string, optionsFirst bool) (args map[string]any, output string, err error) {
 	if argv == nil && len(os.Args) > 1 {
 		argv = os.Args[1:]
 	}
@@ -284,7 +284,7 @@ func parseOption(optionDescription string) *pattern {
 	short := ""
 	long := ""
 	argcount := 0
-	var value interface{}
+	var value any
 	value = false
 
 	reDefault := regexp.MustCompile(`(?i)\[default: (.*)\]`)
@@ -397,7 +397,7 @@ func parseAtom(tokens *tokenList, options *patternList) (patternList, error) {
 func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 	// long ::= '--' chars [ ( ' ' | '=' ) chars ] ;
 	long, eq, v := stringPartition(tokens.move().String(), "=")
-	var value interface{}
+	var value any
 	var opt *pattern
 	if eq == "" && v == "" {
 		value = nil
@@ -436,7 +436,7 @@ func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 		opt = newOption("", long, argcount, false)
 		*options = append(*options, opt)
 		if tokens.err == errorUser {
-			var val interface{}
+			var val any
 			if argcount > 0 {
 				val = value
 			} else {
@@ -501,7 +501,7 @@ func parseShorts(tokens *tokenList, options *patternList) (patternList, error) {
 			}
 		} else { // why copying is necessary here?
 			opt = newOption(short, similar[0].long, similar[0].argcount, similar[0].value)
-			var value interface{}
+			var value any
 			if opt.argcount > 0 {
 				if left == "" {
 					if tokens.current().match(true, "--") {

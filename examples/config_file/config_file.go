@@ -3,18 +3,19 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/marco-m/docopt-go"
 	"strings"
+
+	"github.com/marco-m/docopt-go"
 )
 
-func loadJSONConfig() map[string]interface{} {
-	var result map[string]interface{}
+func loadJSONConfig() map[string]any {
+	var result map[string]any
 	jsonData := []byte(`{"--force": true, "--timeout": "10", "--baud": "9600"}`)
 	json.Unmarshal(jsonData, &result)
 	return result
 }
 
-func loadIniConfig() map[string]interface{} {
+func loadIniConfig() map[string]any {
 	iniData := `
 [default-arguments]
 --force
@@ -23,12 +24,12 @@ func loadIniConfig() map[string]interface{} {
 	// trivial ini parser
 	// default value for an item is bool: true (for --force)
 	// otherwise the value is a string
-	iniParsed := make(map[string]map[string]interface{})
+	iniParsed := make(map[string]map[string]any)
 	var section string
 	for _, line := range strings.Split(iniData, "\n") {
 		if strings.HasPrefix(line, "[") {
 			section = line
-			iniParsed[section] = make(map[string]interface{})
+			iniParsed[section] = make(map[string]any)
 		} else if section != "" {
 			kv := strings.SplitN(line, "=", 2)
 			if len(kv) == 1 {
@@ -44,8 +45,8 @@ func loadIniConfig() map[string]interface{} {
 // merge combines two maps.
 // truthiness takes priority over falsiness
 // mapA takes priority over mapB
-func merge(mapA, mapB map[string]interface{}) map[string]interface{} {
-	result := make(map[string]interface{})
+func merge(mapA, mapB map[string]any) map[string]any {
+	result := make(map[string]any)
 	for k, v := range mapA {
 		result[k] = v
 	}

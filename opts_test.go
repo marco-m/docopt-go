@@ -144,10 +144,10 @@ type testTypedOptions struct {
 	V       bool
 	Number  int16
 	Idle    float32
-	Pointer uintptr     `docopt:"<ptr>"`
-	Ints    []int       `docopt:"<values>"`
-	Strings []string    `docopt:"STRINGS"`
-	Iface   interface{} `docopt:"IFACE"`
+	Pointer uintptr  `docopt:"<ptr>"`
+	Ints    []int    `docopt:"<values>"`
+	Strings []string `docopt:"STRINGS"`
+	Iface   any      `docopt:"IFACE"`
 }
 
 func TestBindErrors(t *testing.T) {

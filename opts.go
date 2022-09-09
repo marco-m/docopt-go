@@ -37,7 +37,7 @@ func errStrconv(key string, convErr error) error {
 //
 // Note that any non-boolean option / flag will have a string value in the
 // underlying map.
-type Opts map[string]interface{}
+type Opts map[string]any
 
 func (o Opts) String(key string) (s string, err error) {
 	v, ok := o[key]
@@ -108,7 +108,7 @@ func (o Opts) Float64(key string) (f float64, err error) {
 // named field (as above).
 //
 // Bind also handles conversion to bool, float, int or string types.
-func (o Opts) Bind(v interface{}) error {
+func (o Opts) Bind(v any) error {
 	structVal := reflect.ValueOf(v)
 	if structVal.Kind() != reflect.Ptr {
 		return newError("'v' argument is not pointer to struct type")

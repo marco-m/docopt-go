@@ -69,25 +69,6 @@ func (p *Parser) ParseArgs(doc string, argv []string, version string) (Opts, err
 	return p.parse(doc, argv, version)
 }
 
-// Deprecated: Parse is provided for backward compatibility with the original docopt.go package.
-// Please rather make use of ParseDoc, ParseArgs, or use your own custom Parser.
-func Parse(doc string, argv []string, help bool, version string, optionsFirst bool, exit ...bool) (map[string]any, error) {
-	exitOk := true
-	if len(exit) > 0 {
-		exitOk = exit[0]
-	}
-	p := &Parser{
-		OptionsFirst:  optionsFirst,
-		SkipHelpFlags: !help,
-	}
-	if exitOk {
-		p.HelpHandler = PrintHelpAndExit
-	} else {
-		p.HelpHandler = PrintHelpOnly
-	}
-	return p.parse(doc, argv, version)
-}
-
 func (p *Parser) parse(doc string, argv []string, version string) (map[string]any, error) {
 	if argv == nil {
 		argv = os.Args[1:]

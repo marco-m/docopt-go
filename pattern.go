@@ -176,7 +176,7 @@ func (p *pattern) flat(types patternType) (patternList, error) {
 		}
 		return result, nil
 	}
-	return nil, newError("unknown pattern type: %d, %d", p.t, types)
+	return nil, fmt.Errorf("unknown pattern type: %d, %d", p.t, types)
 }
 
 func (p *pattern) fix() error {
@@ -494,7 +494,7 @@ func (pl patternList) index(p *pattern) (int, error) {
 			return i, nil
 		}
 	}
-	return -1, newError("%s not in list", p)
+	return -1, fmt.Errorf("%s not in list", p)
 }
 
 func (pl patternList) count(p *pattern) int {

@@ -32,7 +32,7 @@ type tokenList struct {
 type token string
 
 func newTokenList(source []string, err errorType) *tokenList {
-	errorFunc := newError
+	errorFunc := fmt.Errorf
 	if err == errorUser {
 		errorFunc = func(format string, a ...any) error {
 			return &UserError{fmt.Sprintf(format, a...)}

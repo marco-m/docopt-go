@@ -403,7 +403,7 @@ func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 	}
 
 	if !strings.HasPrefix(long, "--") {
-		return nil, newError("long option '%s' doesn't start with --", long)
+		return nil, fmt.Errorf("long option '%s' doesn't start with --", long)
 	}
 	similar := patternList{}
 	for _, o := range *options {
@@ -474,7 +474,7 @@ func parseShorts(tokens *tokenList, options *patternList) (patternList, error) {
 	// shorts ::= '-' ( chars )* [ [ ' ' ] chars ] ;
 	tok := tokens.move()
 	if !tok.hasPrefix("-") || tok.hasPrefix("--") {
-		return nil, newError("short option '%s' doesn't start with -", tok)
+		return nil, fmt.Errorf("short option '%s' doesn't start with -", tok)
 	}
 	left := strings.TrimLeft(tok.String(), "-")
 	parsed := patternList{}

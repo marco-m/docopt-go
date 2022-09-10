@@ -111,13 +111,13 @@ func (o Opts) Float64(key string) (f float64, err error) {
 func (o Opts) Bind(v any) error {
 	structVal := reflect.ValueOf(v)
 	if structVal.Kind() != reflect.Ptr {
-		return newError("'v' argument is not pointer to struct type")
+		return fmt.Errorf("'v' argument is not pointer to struct type")
 	}
 	for structVal.Kind() == reflect.Ptr {
 		structVal = structVal.Elem()
 	}
 	if structVal.Kind() != reflect.Struct {
-		return newError("'v' argument is not pointer to struct type")
+		return fmt.Errorf("'v' argument is not pointer to struct type")
 	}
 	structType := structVal.Type()
 
@@ -160,12 +160,12 @@ func (o Opts) Bind(v any) error {
 			if k == "--help" || k == "--version" { // Don't require these to be mapped.
 				continue
 			}
-			return newError("mapping of %q is not found in given struct, or is an unexported field", k)
+			return fmt.Errorf("mapping of %q is not found in given struct, or is an unexported field", k)
 		}
 		fieldVal := structVal.Field(i)
 		zeroVal := reflect.Zero(fieldVal.Type())
 		if !reflect.DeepEqual(fieldVal.Interface(), zeroVal.Interface()) {
-			return newError("%q field is non-zero, will be overwritten by value of %q", structType.Field(i).Name, k)
+			return fmt.Errorf("%q field is non-zero, will be overwritten by value of %q", structType.Field(i).Name, k)
 		}
 		indexMap[k] = i
 	}
@@ -189,7 +189,7 @@ func (o Opts) Bind(v any) error {
 			continue
 		}
 		if !field.CanSet() {
-			return newError("%q field cannot be set", structType.Field(i).Name)
+			return fmt.Errorf("%q field cannot be set", structType.Field(i).Name)
 		}
 		// Try to assign now if able. bool and string values should be assignable already.
 		if optVal.Type().AssignableTo(field.Type()) {
@@ -218,7 +218,7 @@ func (o Opts) Bind(v any) error {
 		// 		}
 		// 		fmt.Printf("\n")
 		// 	}
-		return newError("value of %q is not assignable to %q field", k, structType.Field(i).Name)
+		return fmt.Errorf("value of %q is not assignable to %q field", k, structType.Field(i).Name)
 	}
 
 	return nil
@@ -227,8 +227,9 @@ func (o Opts) Bind(v any) error {
 // isUnexportedField returns whether the field is unexported.
 // isUnexportedField is to avoid the bug in versions older than Go1.3.
 // See following links:
-//   https://code.google.com/p/go/issues/detail?id=7247
-//   http://golang.org/ref/spec#Exported_identifiers
+//
+//	https://code.google.com/p/go/issues/detail?id=7247
+//	http://golang.org/ref/spec#Exported_identifiers
 func isUnexportedField(field reflect.StructField) bool {
 	return !(field.PkgPath == "" && unicode.IsUpper(rune(field.Name[0])))
 }

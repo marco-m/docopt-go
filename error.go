@@ -1,11 +1,7 @@
 package docopt
 
-import (
-	"fmt"
-)
-
 // UserError records an error with program arguments.
-// Can be used by client code to perform specific CLI validation.
+// Can be used also by client code to report specific CLI validation errors.
 type UserError struct {
 	Msg string
 }
@@ -22,5 +18,3 @@ type LanguageError struct {
 func (e LanguageError) Error() string {
 	return e.msg
 }
-
-var newError = fmt.Errorf

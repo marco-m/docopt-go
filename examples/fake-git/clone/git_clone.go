@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/marco-m/docopt-go"
 )
 
@@ -32,6 +34,6 @@ options:
     --depth <depth>       create a shallow clone of that depth
 `
 
-	args, _ := docopt.ParseDoc(usage)
+	args, _ := docopt.ParseArgs(usage, os.Args[1:], "")
 	fmt.Println(args)
 }

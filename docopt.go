@@ -52,11 +52,6 @@ var DefaultParser = &Parser{
 	SkipHelpFlags: false,
 }
 
-// ParseDoc parses os.Args[1:] based on the interface described in doc, using the default parser options.
-func ParseDoc(doc string) (Opts, error) {
-	return ParseArgs(doc, nil, "")
-}
-
 // ParseArgs parses custom arguments based on the interface described in doc. If you provide a non-empty version
 // string, then this will be displayed when the --version flag is found. This method uses the default parser options.
 func ParseArgs(doc string, argv []string, version string) (Opts, error) {

@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/marco-m/docopt-go"
 )
 
@@ -14,6 +16,6 @@ Example, try:
 Options:
   -h, --help`
 
-	arguments, _ := docopt.ParseDoc(usage)
+	arguments, _ := docopt.ParseArgs(usage, os.Args[1:], "")
 	fmt.Println(arguments)
 }

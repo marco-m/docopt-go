@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/marco-m/docopt-go"
 )
 
@@ -24,6 +26,6 @@ Options:
   --right  use right-hand side`
 
 func main() {
-	arguments, _ := docopt.ParseDoc(usage)
+	arguments, _ := docopt.ParseArgs(usage, os.Args[1:], "")
 	fmt.Println(arguments)
 }

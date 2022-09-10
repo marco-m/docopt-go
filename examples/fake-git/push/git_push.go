@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/marco-m/docopt-go"
 )
 
@@ -29,6 +31,6 @@ options:
     --progress            force progress reporting
 `
 
-	args, _ := docopt.ParseDoc(usage)
+	args, _ := docopt.ParseArgs(usage, os.Args[1:], "")
 	fmt.Println(args)
 }

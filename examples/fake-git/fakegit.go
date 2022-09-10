@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/marco-m/docopt-go"
 	"os"
 	"os/exec"
+
+	"github.com/marco-m/docopt-go"
 )
 
 func main() {
@@ -100,7 +101,7 @@ options:
 	--ignore-missing     check if - even missing - files are ignored in dry run
 `
 
-	args, _ := docopt.ParseDoc(usage)
+	args, _ := docopt.ParseArgs(usage, os.Args[1:], "")
 	fmt.Println(args)
 	return
 }

@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/marco-m/docopt-go"
 )
 
@@ -33,6 +35,6 @@ Specific git-branch actions:
     --merged=<commit>     print only merged branches
 `
 
-	args, _ := docopt.ParseDoc(usage)
+	args, _ := docopt.ParseArgs(usage, os.Args[1:], "")
 	fmt.Println(args)
 }

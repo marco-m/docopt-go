@@ -98,11 +98,11 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 	usageSections := parseSection("usage:", doc)
 
 	if len(usageSections) == 0 {
-		err = newLanguageError("\"usage:\" (case-insensitive) not found.")
+		err = &LanguageError{`"usage:" (case-insensitive) not found.`}
 		return
 	}
 	if len(usageSections) > 1 {
-		err = newLanguageError("More than one \"usage:\" (case-insensitive).")
+		err = &LanguageError{`More than one "usage:" (case-insensitive).`}
 		return
 	}
 	usage := usageSections[0]
@@ -162,7 +162,7 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 		return
 	}
 
-	err = newUserError("")
+	err = &UserError{""}
 	output = handleError(err, usage)
 	return
 }
@@ -512,7 +512,7 @@ func formalUsage(section string) (string, error) {
 	pu := strings.Fields(section)
 
 	if len(pu) == 0 {
-		return "", newLanguageError("no fields found in usage (perhaps a spacing error).")
+		return "", &LanguageError{"no fields found in usage (perhaps a spacing error)."}
 	}
 
 	result := "( "
@@ -548,7 +548,7 @@ func extras(help bool, version string, options patternList, doc string) string {
 
 func stringPartition(s, sep string) (string, string, string) {
 	sepPos := strings.Index(s, sep)
-	if sepPos == -1 { // no seperator found
+	if sepPos == -1 { // no separator found
 		return s, "", ""
 	}
 	split := strings.SplitN(s, sep, 2)

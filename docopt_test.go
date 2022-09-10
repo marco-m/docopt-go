@@ -1415,7 +1415,7 @@ func TestFileTestcases(t *testing.T) {
 			result, err := testParser.ParseArgs(c.doc, c.argv, "")
 			if _, ok := err.(*UserError); c.userError && !ok {
 				// expected a user-error
-				t.Error("testcase:", c.id, "result:", result)
+				t.Error("testcase:", c.id, "result:", result, "error:", err)
 			} else if _, ok := err.(*UserError); !c.userError && ok {
 				// unexpected user-error
 				t.Error("testcase:", c.id, "error:", err, "result:", result)

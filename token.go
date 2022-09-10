@@ -1,6 +1,7 @@
 package docopt
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"unicode"
@@ -16,9 +17,13 @@ type token string
 func newTokenList(source []string, err errorType) *tokenList {
 	errorFunc := newError
 	if err == errorUser {
-		errorFunc = newUserError
+		errorFunc = func(format string, a ...any) error {
+			return &UserError{fmt.Sprintf(format, a...)}
+		}
 	} else if err == errorLanguage {
-		errorFunc = newLanguageError
+		errorFunc = func(format string, a ...any) error {
+			return &LanguageError{fmt.Sprintf(format, a...)}
+		}
 	}
 	return &tokenList{source, errorFunc, err}
 }

@@ -22,16 +22,13 @@ func (e errorType) String() string {
 }
 
 // UserError records an error with program arguments.
+// Can be used by client code to perform specific CLI validation.
 type UserError struct {
-	msg   string
-	Usage string
+	Msg string
 }
 
 func (e UserError) Error() string {
-	return e.msg
-}
-func newUserError(msg string, f ...any) error {
-	return &UserError{fmt.Sprintf(msg, f...), ""}
+	return e.Msg
 }
 
 // LanguageError records an error with the doc string.
@@ -41,9 +38,6 @@ type LanguageError struct {
 
 func (e LanguageError) Error() string {
 	return e.msg
-}
-func newLanguageError(msg string, f ...any) error {
-	return &LanguageError{fmt.Sprintf(msg, f...)}
 }
 
 var newError = fmt.Errorf

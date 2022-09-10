@@ -19,6 +19,6 @@ Options:
   --apply                  apply changes to database
   -q                       operate in quiet mode`
 
-	arguments, _ := docopt.ParseArgs(usage, nil, "1.0.0rc2")
+	arguments, _ := docopt.Parse(usage, nil, "1.0.0rc2")
 	fmt.Println(arguments)
 }

@@ -31,6 +31,6 @@ options:
     --progress            force progress reporting
 `
 
-	args, _ := docopt.ParseArgs(usage, os.Args[1:], "")
+	args, _ := docopt.Parse(usage, os.Args[1:], "")
 	fmt.Println(args)
 }

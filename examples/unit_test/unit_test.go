@@ -64,7 +64,7 @@ func TestUsage(t *testing.T) {
 				}
 			},
 		}
-		opts, err := parser.ParseArgs(usage, tt.argv, "")
+		opts, err := parser.Parse(usage, tt.argv, "")
 		if validArgs != tt.validArgs {
 			t.Fail()
 		}

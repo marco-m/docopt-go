@@ -16,6 +16,6 @@ Example, try:
 Options:
   -h, --help`
 
-	arguments, _ := docopt.ParseArgs(usage, os.Args[1:], "")
+	arguments, _ := docopt.Parse(usage, os.Args[1:], "")
 	fmt.Println(arguments)
 }

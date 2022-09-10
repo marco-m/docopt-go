@@ -10,7 +10,7 @@ func TestOptsUsage(t *testing.T) {
 	usage := "Usage: sleep <seconds> [--now]"
 	var opts Opts
 
-	opts, _ = ParseArgs(usage, []string{"10"}, "")
+	opts, _ = Parse(usage, []string{"10"}, "")
 	i, err := opts.Int("<seconds>")
 	if err != nil || !reflect.DeepEqual(i, int(10)) {
 		t.Fail()
@@ -20,13 +20,13 @@ func TestOptsUsage(t *testing.T) {
 		t.Fail()
 	}
 
-	opts, _ = ParseArgs(usage, []string{"ten"}, "")
+	opts, _ = Parse(usage, []string{"ten"}, "")
 	s, err := opts.String("<seconds>")
 	if err != nil || !reflect.DeepEqual(s, string("ten")) {
 		t.Fail()
 	}
 
-	opts, _ = ParseArgs(usage, []string{"10", "--now"}, "")
+	opts, _ = Parse(usage, []string{"10", "--now"}, "")
 	b, err := opts.Bool("--now")
 	if err != nil || !reflect.DeepEqual(b, true) {
 		t.Fail()
@@ -38,7 +38,7 @@ func TestOptsErrors(t *testing.T) {
 	var opts Opts
 	var err error
 
-	opts, _ = ParseArgs(usage, []string{"ten!"}, "")
+	opts, _ = Parse(usage, []string{"ten!"}, "")
 
 	_, err = opts.Int("<seconds>") // errStrconv
 	if err == nil {
@@ -124,7 +124,7 @@ func TestOptsBind(t *testing.T) {
 		}},
 	} {
 		result := testOptions{}
-		v, err := testParser.ParseArgs(usage, c.argv, "")
+		v, err := testParser.Parse(usage, c.argv, "")
 		t.Logf("argv: %v opts: %v", c.argv, v)
 		if err != nil {
 			t.Fatalf("testcase: %d parse err: %q", i, err)
@@ -194,7 +194,7 @@ func TestBindErrors(t *testing.T) {
 		},
 	} {
 		argv := strings.Split(tc.command, " ")[1:]
-		opts, err := testParser.ParseArgs(tc.usage, argv, "")
+		opts, err := testParser.Parse(tc.usage, argv, "")
 		if err != nil {
 			t.Fatalf("testcase: %d parse err: %q", i, err)
 		}
@@ -246,7 +246,7 @@ func TestBindSuccess(t *testing.T) {
 		},
 	} {
 		argv := strings.Split(tc.command, " ")[1:]
-		opts, err := testParser.ParseArgs(tc.usage, argv, "")
+		opts, err := testParser.Parse(tc.usage, argv, "")
 		if err != nil {
 			t.Fatalf("testcase: %d parse err: %q", i, err)
 		}
@@ -260,7 +260,7 @@ func TestBindSuccess(t *testing.T) {
 
 func TestBindSimpleStruct(t *testing.T) {
 	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
-	opts, err := testParser.ParseArgs("Usage: prog [--number=X]", []string{"--number=123"}, "")
+	opts, err := testParser.Parse("Usage: prog [--number=X]", []string{"--number=123"}, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -275,7 +275,7 @@ func TestBindSimpleStruct(t *testing.T) {
 
 func TestBindToStructWhichAlreadyHasValue(t *testing.T) {
 	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
-	opts, err := testParser.ParseArgs("Usage: prog [--number=X]", []string{"--number=123"}, "")
+	opts, err := testParser.Parse("Usage: prog [--number=X]", []string{"--number=123"}, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -287,7 +287,7 @@ func TestBindToStructWhichAlreadyHasValue(t *testing.T) {
 
 func TestBindDashTag(t *testing.T) {
 	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
-	opts, err := testParser.ParseArgs("Usage: prog [-]", []string{"-"}, "")
+	opts, err := testParser.Parse("Usage: prog [-]", []string{"-"}, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -304,7 +304,7 @@ func TestBindDashTag(t *testing.T) {
 
 func TestBindDoubleDashTag(t *testing.T) {
 	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
-	opts, err := testParser.ParseArgs("Usage: prog [--]", []string{"--"}, "")
+	opts, err := testParser.Parse("Usage: prog [--]", []string{"--"}, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -321,7 +321,7 @@ func TestBindDoubleDashTag(t *testing.T) {
 
 func TestBindHyphenatedTags(t *testing.T) {
 	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
-	opts, err := testParser.ParseArgs("Usage: prog --opt-one=N --opt-two=N", []string{"--opt-one", "123", "--opt-two", "234"}, "")
+	opts, err := testParser.Parse("Usage: prog --opt-one=N --opt-two=N", []string{"--opt-one", "123", "--opt-two", "234"}, "")
 	if err != nil {
 		t.Fatal(err)
 	}

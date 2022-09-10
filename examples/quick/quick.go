@@ -11,6 +11,6 @@ func main() {
   quick serial <port> [--baud=9600] [--timeout=<seconds>]
   quick -h | --help | --version`
 
-	arguments, _ := docopt.ParseArgs(usage, nil, "0.1.1rc")
+	arguments, _ := docopt.Parse(usage, nil, "0.1.1rc")
 	fmt.Println(arguments)
 }

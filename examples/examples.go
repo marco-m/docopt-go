@@ -10,7 +10,7 @@ import (
 
 // TestUsage is a helper used to test the output from the examples in this folder.
 func TestUsage(usage, command string) {
-	args, _ := docopt.ParseArgs(usage, strings.Split(command, " ")[1:], "")
+	args, _ := docopt.Parse(usage, strings.Split(command, " ")[1:], "")
 
 	// Sort the keys of the arguments map
 	var keys []string

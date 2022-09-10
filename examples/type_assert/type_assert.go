@@ -10,7 +10,7 @@ import (
 func main() {
 	usage := `usage: type_assert [-x] [-y]`
 
-	arguments, err := docopt.ParseArgs(usage, os.Args[1:], "")
+	arguments, err := docopt.Parse(usage, os.Args[1:], "")
 
 	if err != nil {
 		fmt.Println(err)

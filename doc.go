@@ -13,7 +13,7 @@ required. The first, simplest way to parse your docopt usage is to just call:
 This will use os.Args[1:] as the argv slice, and use the default parser
 options. If you want to provide your own version string and args, then use:
 
-	docopt.ParseArgs(usage, argv, "1.2.3")
+	docopt.Parse(usage, argv, "1.2.3")
 
 If the last parameter (version) is a non-empty string, it will be printed when
 --version is given in the argv slice. Finally, we can instantiate our own
@@ -24,7 +24,7 @@ printed and whether to exit after displaying usage messages, etc.
 		HelpHandler: docopt.PrintHelpOnly,
 		OptionsFirst: true,
 	}
-	opts, err := parser.ParseArgs(usage, argv, "")
+	opts, err := parser.Parse(usage, argv, "")
 
 In particular, setting your own custom HelpHandler function makes unit testing
 your own docs with example command line invocations much more enjoyable.

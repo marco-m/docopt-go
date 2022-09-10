@@ -52,15 +52,16 @@ var DefaultParser = &Parser{
 	SkipHelpFlags: false,
 }
 
-// ParseArgs parses custom arguments based on the interface described in doc. If you provide a non-empty version
-// string, then this will be displayed when the --version flag is found. This method uses the default parser options.
-func ParseArgs(doc string, argv []string, version string) (Opts, error) {
-	return DefaultParser.ParseArgs(doc, argv, version)
+// Parse parses custom arguments based on the interface described in doc. If you
+// provide a non-empty version string, then this will be displayed when the --version
+// flag is found.
+func Parse(doc string, argv []string, version string) (Opts, error) {
+	return DefaultParser.Parse(doc, argv, version)
 }
 
-// ParseArgs parses custom arguments based on the interface described in doc. If you provide a non-empty version
+// Parse parses custom arguments based on the interface described in doc. If you provide a non-empty version
 // string, then this will be displayed when the --version flag is found.
-func (p *Parser) ParseArgs(doc string, argv []string, version string) (Opts, error) {
+func (p *Parser) Parse(doc string, argv []string, version string) (Opts, error) {
 	return p.parse(doc, argv, version)
 }
 

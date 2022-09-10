@@ -38,6 +38,6 @@ Options:
   --testsuite=DIR      run regression tests from dir
   --doctest            run doctest on myself`
 
-	arguments, _ := docopt.ParseArgs(usage, nil, "1.0.0rc2")
+	arguments, _ := docopt.Parse(usage, nil, "1.0.0rc2")
 	fmt.Println(arguments)
 }

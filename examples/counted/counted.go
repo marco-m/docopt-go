@@ -19,6 +19,6 @@ Try: counted -vvvvvvvvvv
      counted this.txt that.txt`
 
 func main() {
-	arguments, _ := docopt.ParseArgs(usage, os.Args[1:], "")
+	arguments, _ := docopt.Parse(usage, os.Args[1:], "")
 	fmt.Println(arguments)
 }

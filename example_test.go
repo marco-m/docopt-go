@@ -13,7 +13,7 @@ func ExampleParseArgs() {
 
 	// Parse the command line `example tcp 127.0.0.1 --force`
 	argv := []string{"tcp", "127.0.0.1", "--force"}
-	opts, _ := ParseArgs(usage, argv, "0.1.1rc")
+	opts, _ := Parse(usage, argv, "0.1.1rc")
 
 	// Sort the keys of the options map
 	var keys []string
@@ -47,7 +47,7 @@ func ExampleOpts_Bind() {
 
 	// Parse the command line `example serial 443 --baud=9600`
 	argv := []string{"serial", "443", "--baud=9600"}
-	opts, _ := ParseArgs(usage, argv, "0.1.1rc")
+	opts, _ := Parse(usage, argv, "0.1.1rc")
 
 	var conf struct {
 		Tcp     bool

@@ -34,6 +34,6 @@ options:
     --depth <depth>       create a shallow clone of that depth
 `
 
-	args, _ := docopt.Parse(usage, os.Args[1:], "")
+	args := docopt.MustParse(usage, os.Args[1:], "")
 	fmt.Println(args)
 }

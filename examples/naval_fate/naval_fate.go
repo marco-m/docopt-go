@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/marco-m/docopt-go"
 )
 
@@ -23,6 +24,6 @@ Options:
   --moored      Moored (anchored) mine.
   --drifting    Drifting mine.`
 
-	arguments, _ := docopt.Parse(usage, nil, "Naval Fate 2.0")
+	arguments := docopt.MustParse(usage, nil, "Naval Fate 2.0")
 	fmt.Println(arguments)
 }

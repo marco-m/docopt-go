@@ -46,17 +46,37 @@ var PrintHelpOnly = func(err error, usage string) {
 
 var NoHelpHandler = func(err error, usage string) {}
 
-var DefaultParser = &Parser{
-	HelpHandler:   PrintHelpAndExit,
-	OptionsFirst:  false,
-	SkipHelpFlags: false,
+// Parse parses args based on the interface described in doc.
+// It never calls os.Exit; you have to handle it yourself, allowing to properly unit
+// test command-line arguments. See the examples for idiomatic usage.
+// See also: [MustParse].
+//
+// If you provide a non-empty version string, then this will be displayed when the
+// --version flag is found.
+func Parse(doc string, args []string, version string) (Opts, error) {
+	parser := &Parser{
+		HelpHandler:   PrintHelpOnly,
+		OptionsFirst:  false,
+		SkipHelpFlags: false,
+	}
+	return parser.Parse(doc, args, version)
 }
 
-// Parse parses custom arguments based on the interface described in doc. If you
-// provide a non-empty version string, then this will be displayed when the --version
-// flag is found.
-func Parse(doc string, argv []string, version string) (Opts, error) {
-	return DefaultParser.Parse(doc, argv, version)
+// MustParse parses args based on the interface described in doc.
+// If the user asked for help, it prints it and then calls os.Exit(0).
+// If the user made an invocation error, it prints the error and calls os.Exit(1).
+// See [Parse] for an alternative that allows to unit test and control lifetime..
+func MustParse(doc string, argv []string, version string) Opts {
+	parser := &Parser{
+		HelpHandler:   PrintHelpAndExit,
+		OptionsFirst:  false,
+		SkipHelpFlags: false,
+	}
+	opts, err := parser.Parse(doc, argv, version)
+	if err != nil {
+		panic("MustParse: received error instead of calling os.Exit. Please report.")
+	}
+	return opts
 }
 
 // Parse parses custom arguments based on the interface described in doc. If you provide a non-empty version
@@ -70,7 +90,7 @@ func (p *Parser) parse(doc string, argv []string, version string) (map[string]an
 		argv = os.Args[1:]
 	}
 	if p.HelpHandler == nil {
-		p.HelpHandler = DefaultParser.HelpHandler
+		p.HelpHandler = PrintHelpOnly
 	}
 	args, output, err := parse(doc, argv, !p.SkipHelpFlags, version, p.OptionsFirst)
 	if _, ok := err.(*UserError); ok {

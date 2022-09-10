@@ -25,6 +25,6 @@ options:
     -v, --verbose         be verbose; must be placed before a subcommand
 `
 
-	args, _ := docopt.Parse(usage, os.Args[1:], "")
+	args := docopt.MustParse(usage, os.Args[1:], "")
 	fmt.Println(args)
 }

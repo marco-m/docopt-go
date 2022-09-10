@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/marco-m/docopt-go"
 )
 
@@ -38,6 +39,6 @@ Options:
   --testsuite=DIR      run regression tests from dir
   --doctest            run doctest on myself`
 
-	arguments, _ := docopt.Parse(usage, nil, "1.0.0rc2")
+	arguments := docopt.MustParse(usage, nil, "1.0.0rc2")
 	fmt.Println(arguments)
 }

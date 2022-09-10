@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/marco-m/docopt-go"
 )
 
@@ -11,6 +12,6 @@ func main() {
   quick serial <port> [--baud=9600] [--timeout=<seconds>]
   quick -h | --help | --version`
 
-	arguments, _ := docopt.Parse(usage, nil, "0.1.1rc")
+	arguments := docopt.MustParse(usage, nil, "0.1.1rc")
 	fmt.Println(arguments)
 }

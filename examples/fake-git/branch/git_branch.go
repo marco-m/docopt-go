@@ -35,6 +35,6 @@ Specific git-branch actions:
     --merged=<commit>     print only merged branches
 `
 
-	args, _ := docopt.Parse(usage, os.Args[1:], "")
+	args := docopt.MustParse(usage, os.Args[1:], "")
 	fmt.Println(args)
 }

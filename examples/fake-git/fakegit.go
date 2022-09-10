@@ -32,7 +32,10 @@ The most commonly used git commands are:
 See 'git help <command>' for more information on a specific command.
 `
 	parser := &docopt.Parser{OptionsFirst: true}
-	args, _ := parser.Parse(usage, nil, "git version 1.7.4.4")
+	args, err := parser.Parse(usage, nil, "git version 1.7.4.4")
+	if err != nil {
+		fmt.Println("cli parse:", err)
+	}
 
 	cmd := args["<command>"].(string)
 	cmdArgs := args["<args>"].([]string)
@@ -40,7 +43,7 @@ See 'git help <command>' for more information on a specific command.
 	fmt.Println("global arguments:", args)
 	fmt.Println("command arguments:", cmd, cmdArgs)
 
-	err := runCommand(cmd, cmdArgs)
+	err = runCommand(cmd, cmdArgs)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -101,7 +104,7 @@ options:
 	--ignore-missing     check if - even missing - files are ignored in dry run
 `
 
-	args, _ := docopt.Parse(usage, os.Args[1:], "")
+	args := docopt.MustParse(usage, os.Args[1:], "")
 	fmt.Println(args)
 	return
 }

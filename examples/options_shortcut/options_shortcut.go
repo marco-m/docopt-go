@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/marco-m/docopt-go"
 )
 
@@ -19,6 +20,6 @@ Options:
   --apply                  apply changes to database
   -q                       operate in quiet mode`
 
-	arguments, _ := docopt.Parse(usage, nil, "1.0.0rc2")
+	arguments := docopt.MustParse(usage, nil, "1.0.0rc2")
 	fmt.Println(arguments)
 }

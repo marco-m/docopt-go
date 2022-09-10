@@ -66,7 +66,7 @@ func main() {
 
 	jsonConfig := loadJSONConfig()
 	iniConfig := loadIniConfig()
-	arguments, _ := docopt.Parse(usage, nil, "0.1.1rc")
+	arguments := docopt.MustParse(usage, nil, "0.1.1rc")
 
 	// Arguments take priority over INI, INI takes priority over JSON
 	result := merge(arguments, merge(iniConfig, jsonConfig))

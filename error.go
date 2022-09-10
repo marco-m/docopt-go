@@ -4,23 +4,6 @@ import (
 	"fmt"
 )
 
-type errorType int
-
-const (
-	errorUser errorType = iota
-	errorLanguage
-)
-
-func (e errorType) String() string {
-	switch e {
-	case errorUser:
-		return "errorUser"
-	case errorLanguage:
-		return "errorLanguage"
-	}
-	return ""
-}
-
 // UserError records an error with program arguments.
 // Can be used by client code to perform specific CLI validation.
 type UserError struct {

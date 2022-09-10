@@ -7,6 +7,23 @@ import (
 	"unicode"
 )
 
+type errorType int
+
+const (
+	errorUser errorType = iota
+	errorLanguage
+)
+
+func (e errorType) String() string {
+	switch e {
+	case errorUser:
+		return "errorUser"
+	case errorLanguage:
+		return "errorLanguage"
+	}
+	return "unknownErrorType"
+}
+
 type tokenList struct {
 	tokens    []string
 	errorFunc func(string, ...any) error

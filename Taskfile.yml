@@ -23,12 +23,17 @@ tasks:
       - go build -o bin/quick            ./examples/quick/
       - go build -o bin/type_assert      ./examples/type_assert/
 
+  build:examples:new:
+    desc: Build the new examples
+    cmds:
+      - go build -o bin/do-not-os-exit ./examples/do-not-os-exit/
+
   test:
     desc: Run the tests
     cmds:
-      - go test -count=1 -short -coverprofile=bin/coverage.out -json ./... | tparse -skip
+      - gotestsum -- -coverprofile=bin/cover.out ./...
 
   browser:
     desc: "Show code coverage in browser (usage: task test:<subtarget> browser)"
     cmds:
-      - go tool cover -html=bin/coverage.out
+      - go tool cover -html=bin/cover.out

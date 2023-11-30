@@ -5,15 +5,16 @@ import (
 	"sort"
 )
 
-func ExampleParseArgs() {
-	usage := `Usage:
+func ExampleMustParse() {
+	usage := `
+Usage:
   example tcp [<host>...] [--force] [--timeout=<seconds>]
   example serial <port> [--baud=<rate>] [--timeout=<seconds>]
   example --help | --version`
 
 	// Parse the command line `example tcp 127.0.0.1 --force`
 	argv := []string{"tcp", "127.0.0.1", "--force"}
-	opts, _ := Parse(usage, argv, "0.1.1rc")
+	opts := MustParse(usage, argv, "0.1.1rc")
 
 	// Sort the keys of the options map
 	var keys []string
@@ -40,7 +41,8 @@ func ExampleParseArgs() {
 }
 
 func ExampleOpts_Bind() {
-	usage := `Usage:
+	usage := `
+Usage:
   example tcp [<host>...] [--force] [--timeout=<seconds>]
   example serial <port> [--baud=<rate>] [--timeout=<seconds>]
   example --help | --version`

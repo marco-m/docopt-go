@@ -17,6 +17,8 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/go-quicktest/qt"
 )
 
 var testParser = &Parser{HelpHandler: NoHelpHandler}
@@ -1134,18 +1136,22 @@ func TestAllowDoubleDash(t *testing.T) {
 	}
 }
 
-func TestDocopt(t *testing.T) {
+func TestDocopt1(t *testing.T) {
 	doc := `Usage: prog [-v] A
 
                 Options: -v  Be verbose.`
-	if v, err := testParser.Parse(doc, []string{"arg"}, ""); reflect.DeepEqual(v, Opts{"-v": false, "A": "arg"}) != true {
-		t.Error(err)
-	}
-	if v, err := testParser.Parse(doc, []string{"-v", "arg"}, ""); reflect.DeepEqual(v, Opts{"-v": true, "A": "arg"}) != true {
-		t.Error(err)
-	}
 
-	doc = `Usage: prog [-vqr] [FILE]
+	v1, err := testParser.Parse(doc, []string{"arg"}, "")
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.DeepEquals(v1, Opts{"-v": false, "A": "arg"}))
+
+	v2, err := testParser.Parse(doc, []string{"-v", "arg"}, "")
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.DeepEquals(v2, Opts{"-v": true, "A": "arg"}))
+}
+
+func TestDocopt2(t *testing.T) {
+	doc := `Usage: prog [-vqr] [FILE]
               prog INPUT OUTPUT
               prog --help
 
@@ -1154,27 +1160,38 @@ func TestDocopt(t *testing.T) {
       -q  report only file names
       -r  show all occurrences of the same error
       --help
-
     `
-	if v, err := testParser.Parse(doc, []string{"-v", "file.py"}, ""); reflect.DeepEqual(v, Opts{"-v": true, "-q": false, "-r": false, "--help": false, "FILE": "file.py", "INPUT": nil, "OUTPUT": nil}) != true {
-		t.Error(err)
-	}
-	if v, err := testParser.Parse(doc, []string{"-v"}, ""); reflect.DeepEqual(v, Opts{"-v": true, "-q": false, "-r": false, "--help": false, "FILE": nil, "INPUT": nil, "OUTPUT": nil}) != true {
-		t.Error(err)
-	}
+
+	v, err := testParser.Parse(doc, []string{"-v", "file.py"}, "")
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.DeepEquals(v, Opts{"-v": true, "-q": false, "-r": false, "--help": false, "FILE": "file.py", "INPUT": nil, "OUTPUT": nil}))
+
+	v, err = testParser.Parse(doc, []string{"-v"}, "")
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.DeepEquals(v, Opts{"-v": true, "-q": false, "-r": false, "--help": false, "FILE": nil, "INPUT": nil, "OUTPUT": nil}))
+}
+
+func TestDocoptFailure(t *testing.T) {
+	doc := `Usage: prog [-vqr] [FILE]
+              prog INPUT OUTPUT
+              prog --help
+
+    Options:
+      -v  print status messages
+      -q  report only file names
+      -r  show all occurrences of the same error
+      --help
+    `
 
 	_, err := testParser.Parse(doc, []string{"-v", "input.py", "output.py"}, "") // does not match
-	if _, ok := err.(*UserError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorAs(err, new(*UserError)))
+
 	_, err = testParser.Parse(doc, []string{"--fake"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorAs(err, new(*UserError)))
+
 	_, output, err := parseOutput(doc, []string{"--hel"}, true, "", false)
-	if err != nil || len(output) == 0 {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrHelp))
+	qt.Assert(t, qt.Equals(output, doc))
 }
 
 func TestLanguageErrors(t *testing.T) {
@@ -1188,14 +1205,19 @@ func TestLanguageErrors(t *testing.T) {
 	}
 }
 
+func TestIssue40ForkErrHelp(t *testing.T) {
+	doc := "usage: prog --help-commands | --help"
+	_, output, err := parseOutput(doc, []string{"--help"}, true, "", false)
+
+	qt.Assert(t, qt.ErrorIs(err, ErrHelp))
+	qt.Assert(t, qt.Equals(output, doc))
+}
+
 func TestIssue40(t *testing.T) {
-	_, output, err := parseOutput("usage: prog --help-commands | --help", []string{"--help"}, true, "", false)
-	if err != nil || len(output) == 0 {
-		t.Error(err)
-	}
-	if v, err := testParser.Parse("usage: prog --aabb | --aa", []string{"--aa"}, ""); reflect.DeepEqual(v, Opts{"--aabb": false, "--aa": true}) != true {
-		t.Error(err)
-	}
+	v, err := testParser.Parse("usage: prog --aabb | --aa", []string{"--aa"}, "")
+
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.DeepEquals(v, Opts{"--aabb": false, "--aa": true}))
 }
 
 func TestIssue34UnicodeStrings(t *testing.T) {
@@ -1490,7 +1512,8 @@ func parseTest(raw []byte) ([]testcase, error) {
 }
 
 // parseOutput uses a custom parser which also returns the output
-func parseOutput(doc string, argv []string, help bool, version string, optionsFirst bool) (Opts, string, error) {
+func parseOutput(doc string, argv []string, help bool, version string, optionsFirst bool,
+) (Opts, string, error) {
 	var output string
 	p := &Parser{
 		HelpHandler:   func(err error, usage string) { output = usage },

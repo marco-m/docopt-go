@@ -1,8 +1,11 @@
-docopt-go
-=========
+# docopt-go
 
-NOTE: This is a fork of https://github.com/docopt/docopt.go
+## NOTES
 
+- This is a fork of https://github.com/docopt/docopt.go
+- With release 0.8.0, this fork abandons backward compatibility.
+
+## Introduction
 
 An implementation of [docopt](http://docopt.org/) in the [Go](http://golang.org/) programming language.
 
@@ -34,7 +37,7 @@ Options:
   --moored      Moored (anchored) mine.
   --drifting    Drifting mine.`
 
-	  arguments, _ := docopt.ParseDoc(usage)
+	  arguments := docopt.MustParseDoc(usage)
 	  fmt.Println(arguments)
 }
 ```
@@ -59,31 +62,16 @@ $ go get github.com/marco-m/docopt-go
 
 Given a conventional command-line help message, docopt processes the arguments. See https://github.com/docopt/docopt#help-message-format for a description of the help message format.
 
-This package exposes three different APIs, depending on the level of control required. The first, simplest way to parse your docopt usage is to just call:
-
 ```go
-docopt.ParseDoc(usage)
+opts, err := docopt.Parse(usage, args, "1.2.3")
+opts := docopt.MustParse(usage, args, "1.2.3")
 ```
 
-This will use `os.Args[1:]` as the argv slice, and use the default parser options. If you want to provide your own version string and args, then use:
+If the last parameter (version) is a non-empty string, it will be printed when `--version` is given in the args slice.
 
-```go
-docopt.ParseArgs(usage, argv, "1.2.3")
-```
+The function returns a map of option names to the values parsed from args, and an error or nil.
 
-If the last parameter (version) is a non-empty string, it will be printed when `--version` is given in the argv slice. Finally, we can instantiate our own `docopt.Parser` which gives us control over how things like help messages are printed and whether to exit after displaying usage messages, etc.
-
-```go
-parser := &docopt.Parser{
-  HelpHandler: docopt.PrintHelpOnly,
-  OptionsFirst: true,
-}
-opts, err := parser.ParseArgs(usage, argv, "")
-```
-
-In particular, setting your own custom `HelpHandler` function makes unit testing your own docs with example command line invocations much more enjoyable.
-
-All three of these return a map of option names to the values parsed from argv, and an error or nil. You can get the values using the helpers, or just treat it as a regular map:
+You can get the values using the helpers, or just treat it as a regular map:
 
 ```go
 flag, _ := opts.Bool("--flag")

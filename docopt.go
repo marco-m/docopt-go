@@ -85,28 +85,29 @@ func (p *Parser) Parse(doc string, argv []string, version string) (Opts, error) 
 	return p.parse(doc, argv, version)
 }
 
-func (p *Parser) parse(doc string, argv []string, version string) (map[string]any, error) {
-	if argv == nil {
-		argv = os.Args[1:]
-	}
+func (p *Parser) parse(doc string, args []string, version string) (map[string]any, error) {
 	if p.HelpHandler == nil {
 		p.HelpHandler = PrintHelpOnly
 	}
-	args, output, err := parse(doc, argv, !p.SkipHelpFlags, version, p.OptionsFirst)
+	opts, output, err := parse(doc, args, !p.SkipHelpFlags, version, p.OptionsFirst)
 	if _, ok := err.(*UserError); ok {
 		// the user gave us bad input
 		p.HelpHandler(err, output)
-	} else if len(output) > 0 && err == nil {
+		return opts, err
+	}
+	if len(output) > 0 && err == nil {
 		// the user asked for help or --version
 		p.HelpHandler(err, output)
+		return opts, ErrHelp
 	}
-	return args, err
+	return opts, err
 }
 
 // -----------------------------------------------------------------------------
 
 // parse and return a map of args, output and all errors
-func parse(doc string, argv []string, help bool, version string, optionsFirst bool) (args map[string]any, output string, err error) {
+func parse(doc string, argv []string, help bool, version string, optionsFirst bool,
+) (opts map[string]any, output string, err error) {
 	if argv == nil && len(os.Args) > 1 {
 		argv = os.Args[1:]
 	}
@@ -174,11 +175,20 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 			output = handleError(err, usage)
 			return
 		}
-		args = append(patFlat, *collected...).dictionary()
+		opts = append(patFlat, *collected...).dictionary()
 		return
 	}
 
-	err = &UserError{""}
+	// FIXME
+	bho := make([]string, 0, len(patternArgv))
+	for _, x := range patternArgv {
+		if v, ok := x.value.(string); ok {
+			bho = append(bho, v)
+		} else {
+			bho = append(bho, "BHO")
+		}
+	}
+	err = &UserError{strings.Join(bho, " ")}
 	output = handleError(err, usage)
 	return
 }

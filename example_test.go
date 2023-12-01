@@ -3,6 +3,8 @@ package docopt
 import (
 	"fmt"
 	"sort"
+
+	"golang.org/x/exp/maps"
 )
 
 func ExampleMustParse() {
@@ -17,10 +19,7 @@ Usage:
 	opts := MustParse(usage, argv, "0.1.1rc")
 
 	// Sort the keys of the options map
-	var keys []string
-	for k := range opts {
-		keys = append(keys, k)
-	}
+	keys := maps.Keys(opts)
 	sort.Strings(keys)
 
 	// Print the option keys and values
@@ -49,7 +48,12 @@ Usage:
 
 	// Parse the command line `example serial 443 --baud=9600`
 	argv := []string{"serial", "443", "--baud=9600"}
-	opts, _ := Parse(usage, argv, "0.1.1rc")
+	opts, err := Parse(usage, argv, "0.1.1rc")
+	if err != nil {
+		// In real code you would not panic; we do this here due to how
+		// Go testable examples work.
+		panic(err)
+	}
 
 	var conf struct {
 		Tcp     bool
@@ -60,7 +64,11 @@ Usage:
 		Timeout int
 		Baud    int
 	}
-	opts.Bind(&conf)
+	if err := opts.Bind(&conf); err != nil {
+		// In real code you would not panic; we do this here due to how
+		// Go testable examples work.
+		panic(err)
+	}
 
 	if conf.Serial {
 		fmt.Printf("port: %d, baud: %d", conf.Port, conf.Baud)

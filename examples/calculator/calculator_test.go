@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/marco-m/docopt-go/examples"
+	"github.com/marco-m/docopt-go/examples/helpers"
 )
 
 func Example() {
-	examples.TestUsage(usage, "calculator 1 + 2 + 3 + 4 + 5")
-	examples.TestUsage(usage, "calculator 1 + 2 * 3 / 4 - 5")
-	examples.TestUsage(usage, "calculator sum 10 , 20 , 30 , 40")
+	helpers.TestUsage(usage, "calculator 1 + 2 + 3 + 4 + 5")
+	helpers.TestUsage(usage, "calculator 1 + 2 * 3 / 4 - 5")
+	helpers.TestUsage(usage, "calculator sum 10 , 20 , 30 , 40")
 	// Output:
 	//         * 0
 	//         + 4

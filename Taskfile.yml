@@ -8,25 +8,16 @@ tasks:
     desc: Delete build artifacts
     cmds: [rm -rf bin/*]
 
-  build:examples:
-    desc: Build all the examples
+  build:
+    desc: Build all the examples and put them in ./bin
+    dir: examples
     cmds:
-      - go build -o bin/arguments        ./examples/arguments/
-      - go build -o bin/calculator       ./examples/calculator/
-      - go build -o bin/config_file      ./examples/config_file/
-      - go build -o bin/counted          ./examples/counted/
-      - go build -o bin/fake-git         ./examples/fake-git/
-      - go build -o bin/naval_fate       ./examples/naval_fate/
-      - go build -o bin/odd_even         ./examples/odd_even/
-      - go build -o bin/options          ./examples/options/
-      - go build -o bin/options_shortcut ./examples/options_shortcut/
-      - go build -o bin/quick            ./examples/quick/
-      - go build -o bin/type_assert      ./examples/type_assert/
-
-  build:examples:new:
-    desc: Build the new examples
-    cmds:
-      - go build -o bin/do-not-os-exit ./examples/do-not-os-exit/
+      - |
+        for i in *; do
+          echo $i
+          go build -o ../bin/$i ./$i
+        done
+    silent: true
 
   test:
     desc: Run the tests

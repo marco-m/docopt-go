@@ -1,12 +1,10 @@
 package main
 
-import (
-	"github.com/marco-m/docopt-go/examples"
-)
+import "github.com/marco-m/docopt-go/examples/helpers"
 
 func Example() {
-	examples.TestUsage(usage, "arguments -qv")
-	examples.TestUsage(usage, "arguments --left file.A file.B")
+	helpers.TestUsage(usage, "arguments -qv")
+	helpers.TestUsage(usage, "arguments --left file.A file.B")
 	// Output:
 	//    --help false
 	//    --left false

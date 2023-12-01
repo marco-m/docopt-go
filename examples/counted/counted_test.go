@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/marco-m/docopt-go/examples"
+	"github.com/marco-m/docopt-go/examples/helpers"
 )
 
 func Example() {
-	examples.TestUsage(usage, "counted -vvvvvvvvvv")
-	examples.TestUsage(usage, "counted go go")
-	examples.TestUsage(usage, "counted --path ./here --path ./there")
-	examples.TestUsage(usage, "counted this.txt that.txt")
+	helpers.TestUsage(usage, "counted -vvvvvvvvvv")
+	helpers.TestUsage(usage, "counted go go")
+	helpers.TestUsage(usage, "counted --path ./here --path ./there")
+	helpers.TestUsage(usage, "counted this.txt that.txt")
 	// Output:
 	//    --help false
 	//    --path []

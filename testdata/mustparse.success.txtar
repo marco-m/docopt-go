@@ -1,0 +1,8 @@
+# MustParse success, returns exit status 0
+mustparse tcp foobar
+! stderr .
+cmp stdout want.txt
+
+-- want.txt --
+SUCCESS!
+map[--timeout:<nil> <host>:[foobar] tcp:true]

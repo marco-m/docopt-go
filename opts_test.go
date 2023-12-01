@@ -92,7 +92,7 @@ type testOptions struct {
 }
 
 func TestOptsBind(t *testing.T) {
-	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
+	var testParser = &Parser{SkipHelpFlags: true}
 	const usage = "Usage: prog [-h|--help] [-v] [-f] <command>"
 	for i, c := range []struct {
 		argv   []string
@@ -151,7 +151,7 @@ type testTypedOptions struct {
 }
 
 func TestBindErrors(t *testing.T) {
-	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
+	var testParser = &Parser{SkipHelpFlags: true}
 	for i, tc := range []struct {
 		usage       string
 		command     string
@@ -211,7 +211,7 @@ func TestBindErrors(t *testing.T) {
 }
 
 func TestBindSuccess(t *testing.T) {
-	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
+	var testParser = &Parser{SkipHelpFlags: true}
 	for i, tc := range []struct {
 		usage   string
 		command string
@@ -259,7 +259,7 @@ func TestBindSuccess(t *testing.T) {
 }
 
 func TestBindSimpleStruct(t *testing.T) {
-	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
+	var testParser = &Parser{SkipHelpFlags: true}
 	opts, err := testParser.Parse("Usage: prog [--number=X]", []string{"--number=123"}, "")
 	if err != nil {
 		t.Fatal(err)
@@ -274,7 +274,7 @@ func TestBindSimpleStruct(t *testing.T) {
 }
 
 func TestBindToStructWhichAlreadyHasValue(t *testing.T) {
-	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
+	var testParser = &Parser{SkipHelpFlags: true}
 	opts, err := testParser.Parse("Usage: prog [--number=X]", []string{"--number=123"}, "")
 	if err != nil {
 		t.Fatal(err)
@@ -286,7 +286,7 @@ func TestBindToStructWhichAlreadyHasValue(t *testing.T) {
 }
 
 func TestBindDashTag(t *testing.T) {
-	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
+	var testParser = &Parser{SkipHelpFlags: true}
 	opts, err := testParser.Parse("Usage: prog [-]", []string{"-"}, "")
 	if err != nil {
 		t.Fatal(err)
@@ -303,7 +303,7 @@ func TestBindDashTag(t *testing.T) {
 }
 
 func TestBindDoubleDashTag(t *testing.T) {
-	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
+	var testParser = &Parser{SkipHelpFlags: true}
 	opts, err := testParser.Parse("Usage: prog [--]", []string{"--"}, "")
 	if err != nil {
 		t.Fatal(err)
@@ -320,7 +320,7 @@ func TestBindDoubleDashTag(t *testing.T) {
 }
 
 func TestBindHyphenatedTags(t *testing.T) {
-	var testParser = &Parser{HelpHandler: NoHelpHandler, SkipHelpFlags: true}
+	var testParser = &Parser{SkipHelpFlags: true}
 	opts, err := testParser.Parse("Usage: prog --opt-one=N --opt-two=N", []string{"--opt-one", "123", "--opt-two", "234"}, "")
 	if err != nil {
 		t.Fatal(err)

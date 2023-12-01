@@ -5,6 +5,7 @@
 package docopt
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -12,12 +13,6 @@ import (
 )
 
 type Parser struct {
-	// HelpHandler is called when we encounter bad user input, or when the user
-	// asks for help.
-	// By default, this calls os.Exit(0) if it handled a built-in option such
-	// as -h, --help or --version. If the user errored with a wrong command or
-	// options, we exit with a return code of 1.
-	HelpHandler func(err error, usage string)
 	// OptionsFirst requires that option flags always come before positional
 	// arguments; otherwise they can overlap.
 	OptionsFirst bool
@@ -25,26 +20,6 @@ type Parser struct {
 	// call the HelpHandler.
 	SkipHelpFlags bool
 }
-
-var PrintHelpAndExit = func(err error, usage string) {
-	if err != nil {
-		fmt.Fprintln(os.Stderr, usage)
-		os.Exit(1)
-	} else {
-		fmt.Println(usage)
-		os.Exit(0)
-	}
-}
-
-var PrintHelpOnly = func(err error, usage string) {
-	if err != nil {
-		fmt.Fprintln(os.Stderr, usage)
-	} else {
-		fmt.Println(usage)
-	}
-}
-
-var NoHelpHandler = func(err error, usage string) {}
 
 // Parse parses args based on the interface described in doc.
 // It never calls os.Exit; you have to handle it yourself, allowing to properly unit
@@ -54,11 +29,7 @@ var NoHelpHandler = func(err error, usage string) {}
 // If you provide a non-empty version string, then this will be displayed when the
 // --version flag is found.
 func Parse(doc string, args []string, version string) (Opts, error) {
-	parser := &Parser{
-		HelpHandler:   PrintHelpOnly,
-		OptionsFirst:  false,
-		SkipHelpFlags: false,
-	}
+	parser := &Parser{}
 	return parser.Parse(doc, args, version)
 }
 
@@ -67,37 +38,34 @@ func Parse(doc string, args []string, version string) (Opts, error) {
 // If the user made an invocation error, it prints the error and calls os.Exit(1).
 // See [Parse] for an alternative that allows to unit test and control lifetime..
 func MustParse(doc string, argv []string, version string) Opts {
-	parser := &Parser{
-		HelpHandler:   PrintHelpAndExit,
-		OptionsFirst:  false,
-		SkipHelpFlags: false,
-	}
+	parser := &Parser{}
 	opts, err := parser.Parse(doc, argv, version)
 	if err != nil {
-		panic("MustParse: received error instead of calling os.Exit. Please report.")
+		os.Exit(1)
 	}
 	return opts
 }
 
-// Parse parses custom arguments based on the interface described in doc. If you provide a non-empty version
-// string, then this will be displayed when the --version flag is found.
+// Parse parses custom arguments based on the interface described in doc.
+// If you provide a non-empty version string, then this will be displayed when
+// the --version flag is found.
 func (p *Parser) Parse(doc string, argv []string, version string) (Opts, error) {
 	return p.parse(doc, argv, version)
 }
 
 func (p *Parser) parse(doc string, args []string, version string) (map[string]any, error) {
-	if p.HelpHandler == nil {
-		p.HelpHandler = PrintHelpOnly
-	}
 	opts, output, err := parse(doc, args, !p.SkipHelpFlags, version, p.OptionsFirst)
-	if _, ok := err.(*UserError); ok {
+	var userError *UserError
+	if errors.As(err, &userError) {
 		// the user gave us bad input
-		p.HelpHandler(err, output)
+		fmt.Fprintln(os.Stderr, output)
 		return opts, err
 	}
+	// FIXME why are we looking at the len of output? Seems that this information
+	//   should instead be encoded only in the error...
 	if len(output) > 0 && err == nil {
 		// the user asked for help or --version
-		p.HelpHandler(err, output)
+		fmt.Println(output)
 		return opts, ErrHelp
 	}
 	return opts, err

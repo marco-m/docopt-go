@@ -6,19 +6,25 @@
 
 ### New
 
-- Function `Parse` that never calls `os.Exit()`.
-- Function `MustParse`.
-- Error `ErrHelp` (user requested help).
+- Add function `Parse`, main entry point of the module. It never calls `os.Exit`.
+- Add function `MustParse`, the only function that calls `os.Exit`.
+- Add error `ErrHelp` (user requested help).
 - Add CHANGELOG.
+- Introduce `testscript` [1] to easily test executables, their output and their status code.
+
+[1]: https://github.com/rogpeppe/go-internal/testscript
 
 ### Breaking changes
 
 - Remove deprecated `Parse` function.
-- Remove `ParseArgs` function; see new `Parse`.
+- Remove `ParseArgs` function; replaced by the new `Parse`.
+- Remove field `HelpHandler` from struct `Parser`.
+- Remove functions for `HelpHandler`: `PrintHelpAndExit`, `PrintHelpOnly`, `NoHelpHandler`.
 
 ### Changes
 
 - Use Go 1.21.
+- examples/unit_test: more idiomatic and simple Go unit tests.
 
 ## Release 0.7.0 2022-03-30
 

@@ -1,0 +1,9 @@
+# When passed an unknown argument, MustParse prints usage and returns exit status 1
+! mustparse ciccio
+! stdout .
+cmp stderr want.txt
+
+-- want.txt --
+ciccio
+Usage:
+  mustparse tcp [<host>...] [--timeout=<seconds>]

@@ -21,7 +21,7 @@ import (
 	"github.com/go-quicktest/qt"
 )
 
-var testParser = &Parser{HelpHandler: NoHelpHandler}
+var testParser = &Parser{}
 
 func TestPatternFlat(t *testing.T) {
 	q := patternList{
@@ -1188,10 +1188,21 @@ func TestDocoptFailure(t *testing.T) {
 
 	_, err = testParser.Parse(doc, []string{"--fake"}, "")
 	qt.Assert(t, qt.ErrorAs(err, new(*UserError)))
+}
 
-	_, output, err := parseOutput(doc, []string{"--hel"}, true, "", false)
+// FIXME I do not want partial match actually!
+func TestDocoptPartialHelpRequested(t *testing.T) {
+	doc := `Usage: prog [-v] [FILE]
+              prog --help
+
+    Options:
+      -v  print status messages
+      --help
+    `
+
+	_, err := Parse(doc, []string{"--hel"}, "")
+
 	qt.Assert(t, qt.ErrorIs(err, ErrHelp))
-	qt.Assert(t, qt.Equals(output, doc))
 }
 
 func TestLanguageErrors(t *testing.T) {
@@ -1207,10 +1218,10 @@ func TestLanguageErrors(t *testing.T) {
 
 func TestIssue40ForkErrHelp(t *testing.T) {
 	doc := "usage: prog --help-commands | --help"
-	_, output, err := parseOutput(doc, []string{"--help"}, true, "", false)
+
+	_, err := Parse(doc, []string{"--help"}, "")
 
 	qt.Assert(t, qt.ErrorIs(err, ErrHelp))
-	qt.Assert(t, qt.Equals(output, doc))
 }
 
 func TestIssue40(t *testing.T) {
@@ -1308,7 +1319,7 @@ func TestOptionsFirst(t *testing.T) {
 		t.Error(err)
 	}
 
-	optFirstParser := &Parser{HelpHandler: PrintHelpOnly, OptionsFirst: true}
+	optFirstParser := &Parser{OptionsFirst: true}
 	if v, err := optFirstParser.Parse("usage: prog [--opt] [<args>...]", []string{"this", "that", "--opt"}, ""); reflect.DeepEqual(v, Opts{"--opt": false, "<args>": []string{"this", "that", "--opt"}}) != true {
 		t.Error(err)
 	}
@@ -1509,19 +1520,6 @@ func parseTest(raw []byte) ([]testcase, error) {
 		}
 	}
 	return res, nil
-}
-
-// parseOutput uses a custom parser which also returns the output
-func parseOutput(doc string, argv []string, help bool, version string, optionsFirst bool,
-) (Opts, string, error) {
-	var output string
-	p := &Parser{
-		HelpHandler:   func(err error, usage string) { output = usage },
-		OptionsFirst:  optionsFirst,
-		SkipHelpFlags: !help,
-	}
-	args, err := p.Parse(doc, argv, version)
-	return args, output, err
 }
 
 var debugEnabled = false

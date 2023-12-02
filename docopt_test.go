@@ -26,7 +26,8 @@ func TestPatternFlat(t *testing.T) {
 	q := patternList{
 		newArgument("N", nil),
 		newOption("-a", "", 0, false),
-		newArgument("M", nil)}
+		newArgument("M", nil),
+	}
 	p, err := newRequired(
 		newOneOrMore(newArgument("N", nil)),
 		newOption("-a", "", 0, false),
@@ -405,10 +406,13 @@ func TestOptionMatch(t *testing.T) {
 		&patternList{
 			newOption("-x", "", 0, false),
 			newOption("-a", "", 0, false),
-			newArgument("N", nil)}, nil)
+			newArgument("N", nil),
+		},
+		nil)
 	y = patternList{
 		newOption("-x", "", 0, false),
-		newArgument("N", nil)}
+		newArgument("N", nil),
+	}
 	z := patternList{newOption("-a", "", 0, false)}
 	if v != true ||
 		reflect.DeepEqual(*w, y) != true ||
@@ -419,7 +423,9 @@ func TestOptionMatch(t *testing.T) {
 	v, w, x = newOption("-a", "", 0, false).match(
 		&patternList{
 			newOption("-a", "", 0, true),
-			newOption("-a", "", 0, false)}, nil)
+			newOption("-a", "", 0, false),
+		},
+		nil)
 	y = patternList{newOption("-a", "", 0, false)}
 	z = patternList{newOption("-a", "", 0, true)}
 	if v != true ||
@@ -449,11 +455,15 @@ func TestArgumentMatch(t *testing.T) {
 	}
 
 	v, w, x = newArgument("N", nil).match(
-		&patternList{newOption("-x", "", 0, false),
+		&patternList{
+			newOption("-x", "", 0, false),
 			newOption("-a", "", 0, false),
-			newArgument("", 5)}, nil)
-	y = patternList{newOption("-x", "", 0, false),
-		newOption("-a", "", 0, false)}
+			newArgument("", 5),
+		}, nil)
+	y = patternList{
+		newOption("-x", "", 0, false),
+		newOption("-a", "", 0, false),
+	}
 	z := patternList{newArgument("N", 5)}
 	if v != true ||
 		reflect.DeepEqual(*w, y) != true ||
@@ -462,8 +472,10 @@ func TestArgumentMatch(t *testing.T) {
 	}
 
 	v, w, x = newArgument("N", nil).match(
-		&patternList{newArgument("", 9),
-			newArgument("", 0)}, nil)
+		&patternList{
+			newArgument("", 9),
+			newArgument("", 0),
+		}, nil)
 	y = patternList{newArgument("", 0)}
 	z = patternList{newArgument("N", 9)}
 	if v != true ||
@@ -496,9 +508,12 @@ func TestCommandMatch(t *testing.T) {
 		&patternList{
 			newOption("-x", "", 0, false),
 			newOption("-a", "", 0, false),
-			newArgument("", "c")}, nil)
-	y = patternList{newOption("-x", "", 0, false),
-		newOption("-a", "", 0, false)}
+			newArgument("", "c"),
+		}, nil)
+	y = patternList{
+		newOption("-x", "", 0, false),
+		newOption("-a", "", 0, false),
+	}
 	z := patternList{newCommand("c", true)}
 	if v != true ||
 		reflect.DeepEqual(*w, y) != true ||
@@ -586,12 +601,16 @@ func TestOptionalMatch(t *testing.T) {
 
 	v, w, x = newOptional(newOption("-a", "", 0, false),
 		newOption("-b", "", 0, false)).match(
-		&patternList{newOption("-b", "", 0, false),
+		&patternList{
+			newOption("-b", "", 0, false),
 			newOption("-x", "", 0, false),
-			newOption("-a", "", 0, false)}, nil)
+			newOption("-a", "", 0, false),
+		}, nil)
 	y = patternList{newOption("-x", "", 0, false)}
-	z := patternList{newOption("-a", "", 0, false),
-		newOption("-b", "", 0, false)}
+	z := patternList{
+		newOption("-a", "", 0, false),
+		newOption("-b", "", 0, false),
+	}
 	if v != true ||
 		reflect.DeepEqual(*w, y) != true ||
 		reflect.DeepEqual(*x, z) != true {
@@ -651,7 +670,8 @@ func TestEitherMatch(t *testing.T) {
 		newOption("-a", "", 0, false),
 		newOption("-b", "", 0, false)).match(&patternList{
 		newOption("-a", "", 0, false),
-		newOption("-b", "", 0, false)}, nil)
+		newOption("-b", "", 0, false),
+	}, nil)
 	y = patternList{newOption("-b", "", 0, false)}
 	z := patternList{newOption("-a", "", 0, false)}
 	if v != true ||
@@ -663,7 +683,8 @@ func TestEitherMatch(t *testing.T) {
 	v, w, x = newEither(
 		newOption("-a", "", 0, false),
 		newOption("-b", "", 0, false)).match(&patternList{
-		newOption("-x", "", 0, false)}, nil)
+		newOption("-x", "", 0, false),
+	}, nil)
 	y = patternList{newOption("-x", "", 0, false)}
 	z = patternList{}
 	if v != false ||
@@ -677,7 +698,8 @@ func TestEitherMatch(t *testing.T) {
 		newOption("-b", "", 0, false),
 		newOption("-c", "", 0, false)).match(&patternList{
 		newOption("-x", "", 0, false),
-		newOption("-b", "", 0, false)}, nil)
+		newOption("-b", "", 0, false),
+	}, nil)
 	y = patternList{newOption("-x", "", 0, false)}
 	z = patternList{newOption("-b", "", 0, false)}
 	if v != true ||
@@ -690,7 +712,8 @@ func TestEitherMatch(t *testing.T) {
 		newRequired(newArgument("N", nil),
 			newArgument("M", nil))).match(&patternList{
 		newArgument("", 1),
-		newArgument("", 2)}, nil)
+		newArgument("", 2),
+	}, nil)
 	y = patternList{}
 	z = patternList{newArgument("N", 1), newArgument("M", 2)}
 	if v != true ||
@@ -743,7 +766,8 @@ func TestOneOrMoreMatch(t *testing.T) {
 	v, w, x = newOneOrMore(newArgument("N", nil)).match(&patternList{
 		newArgument("", 9),
 		newOption("-x", "", 0, false),
-		newArgument("", 8)}, nil)
+		newArgument("", 8),
+	}, nil)
 	y = patternList{newOption("-x", "", 0, false)}
 	z = patternList{newArgument("N", 9), newArgument("N", 8)}
 	if v != true ||
@@ -755,7 +779,8 @@ func TestOneOrMoreMatch(t *testing.T) {
 	v, w, x = newOneOrMore(newOption("-a", "", 0, false)).match(&patternList{
 		newOption("-a", "", 0, false),
 		newArgument("", 8),
-		newOption("-a", "", 0, false)}, nil)
+		newOption("-a", "", 0, false),
+	}, nil)
 	y = patternList{newArgument("", 8)}
 	z = patternList{newOption("-a", "", 0, false), newOption("-a", "", 0, false)}
 	if v != true ||
@@ -766,7 +791,8 @@ func TestOneOrMoreMatch(t *testing.T) {
 
 	v, w, x = newOneOrMore(newOption("-a", "", 0, false)).match(&patternList{
 		newArgument("", 8),
-		newOption("-x", "", 0, false)}, nil)
+		newOption("-x", "", 0, false),
+	}, nil)
 	y = patternList{newArgument("", 8), newOption("-x", "", 0, false)}
 	z = patternList{}
 	if v != false ||
@@ -781,12 +807,15 @@ func TestOneOrMoreMatch(t *testing.T) {
 		newArgument("", 1),
 		newOption("-x", "", 0, false),
 		newOption("-a", "", 0, false),
-		newArgument("", 2)}, nil)
+		newArgument("", 2),
+	}, nil)
 	y = patternList{newOption("-x", "", 0, false)}
-	z = patternList{newOption("-a", "", 0, false),
+	z = patternList{
+		newOption("-a", "", 0, false),
 		newArgument("N", 1),
 		newOption("-a", "", 0, false),
-		newArgument("N", 2)}
+		newArgument("N", 2),
+	}
 	if v != true ||
 		reflect.DeepEqual(*w, y) != true ||
 		reflect.DeepEqual(*x, z) != true {
@@ -809,8 +838,10 @@ func TestListArgumentMatch(t *testing.T) {
 		newArgument("N", nil),
 		newArgument("N", nil))
 	p.fix()
-	v, w, x := p.match(&patternList{newArgument("", "1"),
-		newArgument("", "2")}, nil)
+	v, w, x := p.match(&patternList{
+		newArgument("", "1"),
+		newArgument("", "2"),
+	}, nil)
 	y := patternList{newArgument("N", []string{"1", "2"})}
 	if v != true ||
 		reflect.DeepEqual(*w, patternList{}) != true ||
@@ -820,8 +851,10 @@ func TestListArgumentMatch(t *testing.T) {
 
 	p = newOneOrMore(newArgument("N", nil))
 	p.fix()
-	v, w, x = p.match(&patternList{newArgument("", "1"),
-		newArgument("", "2"), newArgument("", "3")}, nil)
+	v, w, x = p.match(&patternList{
+		newArgument("", "1"),
+		newArgument("", "2"), newArgument("", "3"),
+	}, nil)
 	y = patternList{newArgument("N", []string{"1", "2", "3"})}
 	if v != true ||
 		reflect.DeepEqual(*w, patternList{}) != true ||
@@ -835,7 +868,8 @@ func TestListArgumentMatch(t *testing.T) {
 	v, w, x = p.match(&patternList{
 		newArgument("", "1"),
 		newArgument("", "2"),
-		newArgument("", "3")}, nil)
+		newArgument("", "3"),
+	}, nil)
 	y = patternList{newArgument("N", []string{"1", "2", "3"})}
 	if v != true ||
 		reflect.DeepEqual(*w, patternList{}) != true ||
@@ -848,7 +882,8 @@ func TestListArgumentMatch(t *testing.T) {
 	p.fix()
 	v, w, x = p.match(&patternList{
 		newArgument("", "1"),
-		newArgument("", "2")}, nil)
+		newArgument("", "2"),
+	}, nil)
 	y = patternList{newArgument("N", []string{"1", "2"})}
 	if v != true ||
 		reflect.DeepEqual(*w, patternList{}) != true ||
@@ -877,12 +912,16 @@ func TestBasicPatternMatching(t *testing.T) {
 	}
 
 	// -a -x N Z
-	q = patternList{newOption("-a", "", 0, false),
+	q = patternList{
+		newOption("-a", "", 0, false),
 		newOption("-x", "", 0, false),
-		newArgument("", 9), newArgument("", 5)}
+		newArgument("", 9), newArgument("", 5),
+	}
 	y = patternList{}
-	z := patternList{newOption("-a", "", 0, false), newArgument("N", 9),
-		newOption("-x", "", 0, false), newArgument("Z", 5)}
+	z := patternList{
+		newOption("-a", "", 0, false), newArgument("N", 9),
+		newOption("-x", "", 0, false), newArgument("Z", 5),
+	}
 	v, w, x = p.match(&q, nil)
 	if v != true ||
 		reflect.DeepEqual(*w, y) != true ||
@@ -891,10 +930,14 @@ func TestBasicPatternMatching(t *testing.T) {
 	}
 
 	// -x N Z  # BZZ!
-	q = patternList{newOption("-x", "", 0, false),
-		newArgument("", 9), newArgument("", 5)}
-	y = patternList{newOption("-x", "", 0, false),
-		newArgument("", 9), newArgument("", 5)}
+	q = patternList{
+		newOption("-x", "", 0, false),
+		newArgument("", 9), newArgument("", 5),
+	}
+	y = patternList{
+		newOption("-x", "", 0, false),
+		newArgument("", 9), newArgument("", 5),
+	}
 	z = patternList{}
 	v, w, x = p.match(&q, nil)
 	if v != false ||
@@ -1403,7 +1446,8 @@ BAZZ
 usage: pit stop`
 
 	v = parseSection("usage:", usage)
-	w = []string{"usage: this",
+	w = []string{
+		"usage: this",
 		"usage:hai",
 		"usage: this that",
 		"usage: foo\n       bar",

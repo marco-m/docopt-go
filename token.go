@@ -74,6 +74,7 @@ func (t *token) eq(s string) bool {
 	}
 	return string(*t) == s
 }
+
 func (t *token) match(matchNil bool, tokenStrings ...string) bool {
 	if t == nil && matchNil {
 		return true
@@ -88,24 +89,28 @@ func (t *token) match(matchNil bool, tokenStrings ...string) bool {
 	}
 	return false
 }
+
 func (t *token) hasPrefix(prefix string) bool {
 	if t == nil {
 		return false
 	}
 	return strings.HasPrefix(string(*t), prefix)
 }
+
 func (t *token) hasSuffix(suffix string) bool {
 	if t == nil {
 		return false
 	}
 	return strings.HasSuffix(string(*t), suffix)
 }
+
 func (t *token) isUpper() bool {
 	if t == nil {
 		return false
 	}
 	return isStringUppercase(string(*t))
 }
+
 func (t *token) String() string {
 	if t == nil {
 		return ""

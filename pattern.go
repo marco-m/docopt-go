@@ -425,7 +425,7 @@ func (p *pattern) transform() *pattern {
 		Quirks: [-a] => (-a), (-a...) => (-a -a)
 	*/
 	result := []patternList{}
-	groups := []patternList{patternList{p}}
+	groups := []patternList{{p}}
 	parents := patternRequired +
 		patternOptionAL +
 		patternOptionSSHORTCUT +

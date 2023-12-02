@@ -11,9 +11,11 @@ import (
 func errKey(key string) error {
 	return fmt.Errorf("no such key: %q", key)
 }
+
 func errType(key string) error {
 	return fmt.Errorf("key: %q failed type conversion", key)
 }
+
 func errStrconv(key string, convErr error) error {
 	return fmt.Errorf("key: %q failed type conversion: %s", key, convErr)
 }

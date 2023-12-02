@@ -262,5 +262,5 @@ func guessUntaggedField(key string) string {
 	case strings.HasPrefix(key, "<") && strings.HasSuffix(key, ">"):
 		key = key[1 : len(key)-1]
 	}
-	return strings.Title(strings.ToLower(key))
+	return strings.Title(strings.ToLower(key)) //nolint:staticcheck
 }

@@ -11,7 +11,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"regexp"
@@ -1435,7 +1434,7 @@ func TestIssue126DefaultsNotParsedCorrectlyWhenTabs(t *testing.T) {
 func TestFileTestcases(t *testing.T) {
 	filenames := []string{"testcases.docopt", "test_golang.docopt"}
 	for _, filename := range filenames {
-		raw, err := ioutil.ReadFile(filename)
+		raw, err := os.ReadFile(filename)
 		if err != nil {
 			t.Fatal(err)
 		}

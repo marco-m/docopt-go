@@ -22,8 +22,8 @@ func errStrconv(key string, convErr error) error {
 // methods for value type conversion (bool, float64, int, string). For example,
 // to get an option value as an int:
 //
-//   opts, _ := docopt.ParseDoc("Usage: sleep <seconds>")
-//   secs, _ := opts.Int("<seconds>")
+//	opts, _ := docopt.ParseDoc("Usage: sleep <seconds>")
+//	secs, _ := opts.Int("<seconds>")
 //
 // Additionally, Opts.Bind allows you easily populate a struct's fields with the
 // values of each option value. See below for examples.
@@ -31,9 +31,9 @@ func errStrconv(key string, convErr error) error {
 // Lastly, you can still treat Opts as a regular map, and do any type checking
 // and conversion that you want to yourself. For example:
 //
-//   if s, ok := opts["<binary>"].(string); ok {
-//     if val, err := strconv.ParseUint(s, 2, 64); err != nil { ... }
-//   }
+//	if s, ok := opts["<binary>"].(string); ok {
+//	  if val, err := strconv.ParseUint(s, 2, 64); err != nil { ... }
+//	}
 //
 // Note that any non-boolean option / flag will have a string value in the
 // underlying map.
@@ -93,15 +93,15 @@ func (o Opts) Float64(key string) (f float64, err error) {
 // Each key in Opts will be mapped to an exported field of the struct pointed
 // to by `v`, as follows:
 //
-//   abc int                        // Unexported field, ignored
-//   Abc string                     // Mapped from `--abc`, `<abc>`, or `abc`
-//                                  // (case insensitive)
-//   A string                       // Mapped from `-a`, `<a>` or `a`
-//                                  // (case insensitive)
-//   Abc int  `docopt:"XYZ"`        // Mapped from `XYZ`
-//   Abc bool `docopt:"-"`          // Mapped from `-`
-//   Abc bool `docopt:"-x,--xyz"`   // Mapped from `-x` or `--xyz`
-//                                  // (first non-zero value found)
+//	abc int                        // Unexported field, ignored
+//	Abc string                     // Mapped from `--abc`, `<abc>`, or `abc`
+//	                               // (case insensitive)
+//	A string                       // Mapped from `-a`, `<a>` or `a`
+//	                               // (case insensitive)
+//	Abc int  `docopt:"XYZ"`        // Mapped from `XYZ`
+//	Abc bool `docopt:"-"`          // Mapped from `-`
+//	Abc bool `docopt:"-x,--xyz"`   // Mapped from `-x` or `--xyz`
+//	                               // (first non-zero value found)
 //
 // Tagged (annotated) fields will always be mapped first. If no field is tagged
 // with an option's key, Bind will try to map the option to an appropriately
@@ -157,7 +157,8 @@ func (o Opts) Bind(v any) error {
 	for k := range o {
 		i, ok := getFieldIndex(k)
 		if !ok {
-			if k == "--help" || k == "--version" { // Don't require these to be mapped.
+			// Don't require these to be mapped.
+			if k == "-h" || k == "--help" || k == "--version" {
 				continue
 			}
 			return fmt.Errorf("mapping of %q is not found in given struct, or is an unexported field", k)

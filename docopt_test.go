@@ -1515,20 +1515,3 @@ func parseTest(raw []byte) ([]testcase, error) {
 	}
 	return res, nil
 }
-
-var debugEnabled = false
-
-func debugOn(l ...any) {
-	debugEnabled = true
-	debug(l...)
-}
-func debugOff(l ...any) {
-	debug(l...)
-	debugEnabled = false
-}
-
-func debug(l ...any) {
-	if debugEnabled {
-		fmt.Println(l...)
-	}
-}

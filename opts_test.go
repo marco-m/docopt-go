@@ -139,8 +139,6 @@ func TestOptsBind(t *testing.T) {
 }
 
 type testTypedOptions struct {
-	secret int `docopt:"-s"`
-
 	V       bool
 	Number  int16
 	Idle    float32

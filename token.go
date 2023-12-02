@@ -120,10 +120,6 @@ func (tl *tokenList) current() *token {
 	return nil
 }
 
-func (tl *tokenList) length() int {
-	return len(tl.tokens)
-}
-
 func (tl *tokenList) move() *token {
 	if len(tl.tokens) > 0 {
 		t := tl.tokens[0]

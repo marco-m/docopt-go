@@ -1,0 +1,37 @@
+# top-level help, print and exit 0
+nettool -h
+! stderr .
+cmp stdout top-help.txt
+
+# help for tcp, print and exit 0
+nettool tcp -h
+! stderr .
+cmp stdout tcp-help.txt
+
+# help for serial, print and exit 0
+nettool serial -h
+! stderr .
+cmp stdout serial-help.txt
+
+-- top-help.txt --
+nettool connects to a remote host via various protocols.
+
+Usage:
+  nettool [options] <command> [<args>...]
+  nettool -h | --help | --version
+
+Options:
+  --timeout=<secs>  Connection timeout in seconds [default: 10].
+
+Commands:
+  tcp     Connect via TCP.
+  serial  Connect via serial.
+-- tcp-help.txt --
+Usage:
+  nettool tcp <host> <port>
+-- serial-help.txt --
+Usage:
+  nettool serial [options] <port>
+
+Options:
+  --baud=<speed>  Connection speed in bauds [default: 9600].

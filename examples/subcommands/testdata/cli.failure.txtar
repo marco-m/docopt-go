@@ -1,0 +1,32 @@
+# top-level unknown command, print error and exit non-zero
+! nettool ciccio
+! stdout .
+cmp stderr top-command.txt
+
+# top-level unknown flag, print error and exit non-zero
+# FIXME currently docopt is broken
+! nettool --foo tcp
+! stdout .
+cmp stderr top-flag.txt
+
+# tcp unkown flag,  print error and exit non-zero
+# FIXME currently docopt is broken
+! nettool tcp --foo host 12345
+! stdout .
+cmp stderr tcp-flag.txt
+
+
+
+-- top-command.txt --
+unknown command: "ciccio"
+-- top-flag.txt --
+BHO tcp
+Usage:
+  nettool [options] <command> [<args>...]
+  nettool -h | --help | --version
+BHO tcp
+-- tcp-flag.txt  --
+tcp BHO host 12345
+Usage:
+  nettool tcp <host> <port>
+tcp BHO host 12345

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,6 +10,13 @@ import (
 )
 
 func main() {
+	if err := run(os.Args[1:]); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func run(args []string) error {
 	usage := `usage: git [--version] [--exec-path=<path>] [--html-path]
            [-p|--paginate|--no-pager] [--no-replace-objects]
            [--bare] [--git-dir=<path>] [--work-tree=<path>]
@@ -32,37 +40,21 @@ The most commonly used git commands are:
 See 'git help <command>' for more information on a specific command.
 `
 	parser := &docopt.Parser{OptionsFirst: true}
-	args, err := parser.Parse(usage, nil, "git version 1.7.4.4")
+	opts, err := parser.Parse(usage, args, "git version 1.7.4.4")
+	if errors.Is(err, docopt.ErrHelp) {
+		return nil
+	}
 	if err != nil {
-		fmt.Println("cli parse:", err)
+		return err
 	}
 
-	cmd := args["<command>"].(string)
-	cmdArgs := args["<args>"].([]string)
+	cmd := opts["<command>"].(string)
+	cmdArgs := opts["<args>"].([]string)
 
-	fmt.Println("global arguments:", args)
+	fmt.Println("global arguments:", opts)
 	fmt.Println("command arguments:", cmd, cmdArgs)
 
-	err = runCommand(cmd, cmdArgs)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
-func goRun(scriptName string, args []string) (err error) {
-	cmdArgs := make([]string, 2)
-	cmdArgs[0] = "run"
-	cmdArgs[1] = scriptName
-	cmdArgs = append(cmdArgs, args...)
-	osCmd := exec.Command("go", cmdArgs...)
-	var out []byte
-	out, err = osCmd.Output()
-	fmt.Println(string(out))
-	if err != nil {
-		return
-	}
-	return
+	return runCommand(cmd, cmdArgs)
 }
 
 func runCommand(cmd string, args []string) (err error) {
@@ -83,6 +75,18 @@ func runCommand(cmd string, args []string) (err error) {
 	}
 
 	return fmt.Errorf("%s is not a git command. See 'git help'", cmd)
+}
+
+func goRun(scriptName string, args []string) error {
+	cmdArgs := make([]string, 2)
+	cmdArgs[0] = "run"
+	cmdArgs[1] = scriptName
+	cmdArgs = append(cmdArgs, args...)
+	osCmd := exec.Command("go", cmdArgs...)
+	var out []byte
+	out, err := osCmd.Output()
+	fmt.Println(string(out))
+	return err
 }
 
 func cmdAdd(argv []string) (err error) {

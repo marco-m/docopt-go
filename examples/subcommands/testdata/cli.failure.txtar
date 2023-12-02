@@ -5,7 +5,7 @@ cmp stderr top-command.txt
 
 # top-level unknown flag, print error and exit non-zero
 # FIXME currently docopt is broken
-! nettool --foo tcp
+! nettool --foo --bar tcp
 ! stdout .
 cmp stderr top-flag.txt
 
@@ -20,13 +20,15 @@ cmp stderr tcp-flag.txt
 -- top-command.txt --
 unknown command: ciccio
 -- top-flag.txt --
-BHO tcp
+unknown option: --foo
+unknown option: --bar
 Usage:
   nettool [options] <command> [<args>...]
   nettool -h | --help | --version
-BHO tcp
+unknown option: --foo
+unknown option: --bar
 -- tcp-flag.txt  --
-tcp BHO host 12345
+unknown option: --foo
 Usage:
   nettool tcp <host> <port>
-tcp BHO host 12345
+unknown option: --foo

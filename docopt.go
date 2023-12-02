@@ -147,16 +147,20 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 		return
 	}
 
+	// left contains all the non-matched elements, that is, the errors.
 	// FIXME
-	bho := make([]string, 0, len(patternArgv))
-	for _, x := range patternArgv {
-		if v, ok := x.value.(string); ok {
-			bho = append(bho, v)
+	bho := make([]string, 0, len(*left))
+	for _, unknown := range *left {
+		if unknown.t == patternOption {
+			bho = append(bho, fmt.Sprintf("unknown %s: %s",
+				unknown.t, unknown.name))
 		} else {
-			bho = append(bho, "BHO")
+			// FIXME too optimistic ...
+			bho = append(bho, fmt.Sprintf("unknown %s: %s %v",
+				unknown.t, unknown.name, unknown.value))
 		}
 	}
-	err = &UserError{strings.Join(bho, " ")}
+	err = &UserError{strings.Join(bho, "\n")}
 	output = handleError(err, usage)
 	return
 }

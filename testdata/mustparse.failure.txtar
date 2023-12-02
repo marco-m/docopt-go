@@ -4,6 +4,6 @@
 cmp stderr want.txt
 
 -- want.txt --
-ciccio
+unknown argument:  ciccio
 Usage:
   mustparse tcp [<host>...] [--timeout=<seconds>]

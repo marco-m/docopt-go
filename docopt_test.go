@@ -837,7 +837,8 @@ func TestListArgumentMatch(t *testing.T) {
 	p := newRequired(
 		newArgument("N", nil),
 		newArgument("N", nil))
-	p.fix()
+	err := p.fix()
+	qt.Assert(t, qt.IsNil(err))
 	v, w, x := p.match(&patternList{
 		newArgument("", "1"),
 		newArgument("", "2"),
@@ -850,7 +851,8 @@ func TestListArgumentMatch(t *testing.T) {
 	}
 
 	p = newOneOrMore(newArgument("N", nil))
-	p.fix()
+	err = p.fix()
+	qt.Assert(t, qt.IsNil(err))
 	v, w, x = p.match(&patternList{
 		newArgument("", "1"),
 		newArgument("", "2"), newArgument("", "3"),
@@ -864,7 +866,8 @@ func TestListArgumentMatch(t *testing.T) {
 
 	p = newRequired(newArgument("N", nil),
 		newOneOrMore(newArgument("N", nil)))
-	p.fix()
+	err = p.fix()
+	qt.Assert(t, qt.IsNil(err))
 	v, w, x = p.match(&patternList{
 		newArgument("", "1"),
 		newArgument("", "2"),
@@ -879,7 +882,8 @@ func TestListArgumentMatch(t *testing.T) {
 
 	p = newRequired(newArgument("N", nil),
 		newRequired(newArgument("N", nil)))
-	p.fix()
+	err = p.fix()
+	qt.Assert(t, qt.IsNil(err))
 	v, w, x = p.match(&patternList{
 		newArgument("", "1"),
 		newArgument("", "2"),
@@ -1041,7 +1045,8 @@ func TestPatternFixRepeatingArguments(t *testing.T) {
 	q = newEither(
 		newArgument("N", []string{}),
 		newOneOrMore(newArgument("N", []string{})))
-	p.fix()
+	err := p.fix()
+	qt.Assert(t, qt.IsNil(err))
 	if p.eq(q) != true {
 		t.Fail()
 	}
@@ -1073,7 +1078,8 @@ func TestPatternFixIdentities1(t *testing.T) {
 	if p.children[0] == p.children[1] {
 		t.Fail()
 	}
-	p.fixIdentities(nil)
+	err := p.fixIdentities(nil)
+	qt.Assert(t, qt.IsNil(err))
 	if p.children[0] != p.children[1] {
 		t.Fail()
 	}
@@ -1097,7 +1103,8 @@ func TestPatternFixIdentities2(t *testing.T) {
 	if p.children[0].children[1] == p.children[1] {
 		t.Fail()
 	}
-	p.fixIdentities(nil)
+	err := p.fixIdentities(nil)
+	qt.Assert(t, qt.IsNil(err))
 	if p.children[0].children[1] != p.children[1] {
 		t.Fail()
 	}

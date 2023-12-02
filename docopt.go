@@ -246,8 +246,8 @@ func parseArgv(tokens *tokenList, options *patternList, optionsFirst bool) (patt
 func parseOption(optionDescription string) *pattern {
 	optionDescription = strings.TrimSpace(optionDescription)
 	options, _, description := stringPartition(optionDescription, "  ")
-	options = strings.Replace(options, ",", " ", -1)
-	options = strings.Replace(options, "=", " ", -1)
+	options = strings.ReplaceAll(options, ",", " ")
+	options = strings.ReplaceAll(options, "=", " ")
 
 	short := ""
 	long := ""

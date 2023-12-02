@@ -233,9 +233,9 @@ func (p *pattern) fixRepeatingArguments() {
 		}
 		for _, e := range casMultiple {
 			if e.t == patternArgument || e.t == patternOption && e.argcount > 0 {
-				switch e.value.(type) {
+				switch v := e.value.(type) {
 				case string:
-					e.value = strings.Fields(e.value.(string))
+					e.value = strings.Fields(v)
 				case []string:
 				default:
 					e.value = []string{}
@@ -340,9 +340,9 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 			case int:
 				increment = 1
 			case []string:
-				switch match.value.(type) {
+				switch v := match.value.(type) {
 				case string:
-					increment = []string{match.value.(string)}
+					increment = []string{v}
 				default:
 					increment = match.value
 				}

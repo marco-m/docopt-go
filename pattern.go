@@ -521,7 +521,7 @@ func (pl patternList) diff(l patternList) patternList {
 					break
 				}
 			}
-			if match == false {
+			if !match {
 				result = append(result, v)
 			}
 		}

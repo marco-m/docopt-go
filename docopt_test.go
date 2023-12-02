@@ -42,7 +42,6 @@ func TestPatternFlat(t *testing.T) {
 	if reflect.DeepEqual(p, q) != true {
 		t.Error(err)
 	}
-	return
 }
 
 func TestOption(t *testing.T) {
@@ -104,7 +103,6 @@ func TestOption(t *testing.T) {
 	if !parseOption("-h TOPIC  Descripton... [dEfAuLt: 2]").eq(newOption("-h", "", 1, "2")) {
 		t.Fail()
 	}
-	return
 }
 
 func TestOptionName(t *testing.T) {
@@ -117,7 +115,6 @@ func TestOptionName(t *testing.T) {
 	if newOption("", "--help", 0, false).name != "--help" {
 		t.Fail()
 	}
-	return
 }
 
 func TestCommands(t *testing.T) {
@@ -143,7 +140,6 @@ func TestCommands(t *testing.T) {
 	if _, ok := err.(*UserError); !ok {
 		t.Error(err)
 	}
-	return
 }
 
 func TestFormalUsage(t *testing.T) {
@@ -163,7 +159,6 @@ func TestFormalUsage(t *testing.T) {
 	if formal != "( [-hv] ARG ) | ( N M )" {
 		t.Fail()
 	}
-	return
 }
 
 func TestParseArgv(t *testing.T) {
@@ -1068,7 +1063,7 @@ func TestPatternFixIdentities2(t *testing.T) {
 func TestLongOptionsErrorHandling(t *testing.T) {
 	_, err := testParser.Parse("Usage: prog", []string{"--non-existent"}, "")
 	if _, ok := err.(*UserError); !ok {
-		t.Error(fmt.Sprintf("(%s) %s", reflect.TypeOf(err), err))
+		t.Errorf("(%s) %s", reflect.TypeOf(err), err)
 	}
 	_, err = testParser.Parse("Usage: prog [--version --verbose]\nOptions: --version\n --verbose", []string{"--ver"}, "")
 	if _, ok := err.(*UserError); !ok {
@@ -1080,7 +1075,7 @@ func TestLongOptionsErrorHandling(t *testing.T) {
 	}
 	_, err = testParser.Parse("Usage: prog --long ARG\nOptions: --long ARG", []string{"--long"}, "")
 	if _, ok := err.(*UserError); !ok {
-		t.Error(fmt.Sprintf("(%s) %s", reflect.TypeOf(err), err))
+		t.Errorf("(%s) %s", reflect.TypeOf(err), err)
 	}
 	_, err = testParser.Parse("Usage: prog --long=ARG\nOptions: --long", []string{}, "")
 	if _, ok := err.(*LanguageError); !ok {
@@ -1095,7 +1090,7 @@ func TestLongOptionsErrorHandling(t *testing.T) {
 func TestShortOptionsErrorHandling(t *testing.T) {
 	_, err := testParser.Parse("Usage: prog -x\nOptions: -x  this\n -x  that", []string{}, "")
 	if _, ok := err.(*LanguageError); !ok {
-		t.Error(fmt.Sprintf("(%s) %s", reflect.TypeOf(err), err))
+		t.Errorf("(%s) %s", reflect.TypeOf(err), err)
 	}
 	_, err = testParser.Parse("Usage: prog", []string{"-x"}, "")
 	if _, ok := err.(*UserError); !ok {

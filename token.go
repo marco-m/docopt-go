@@ -134,12 +134,12 @@ func (tl *tokenList) move() *token {
 }
 
 // returns true if all cased characters in the string are uppercase
-// and there are there is at least one cased charcter
+// and there is at least one cased character
 func isStringUppercase(s string) bool {
 	if strings.ToUpper(s) != s {
 		return false
 	}
-	for _, c := range []rune(s) {
+	for _, c := range s {
 		if unicode.IsUpper(c) {
 			return true
 		}

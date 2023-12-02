@@ -75,7 +75,7 @@ func (p *Parser) parse(doc string, args []string, version string) (map[string]an
 
 // parse and return a map of args, output and all errors
 func parse(doc string, argv []string, help bool, version string, optionsFirst bool,
-) (opts map[string]any, output string, err error) {
+) (map[string]any, string, error) {
 	if argv == nil && len(os.Args) > 1 {
 		argv = os.Args[1:]
 	}
@@ -83,68 +83,58 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 	usageSections := parseSection("usage:", doc)
 
 	if len(usageSections) == 0 {
-		err = &LanguageError{`"usage:" (case-insensitive) not found.`}
-		return
+		return nil, "", &LanguageError{`"usage:" (case-insensitive) not found.`}
 	}
 	if len(usageSections) > 1 {
-		err = &LanguageError{`More than one "usage:" (case-insensitive).`}
-		return
+		return nil, "", &LanguageError{`More than one "usage:" (case-insensitive).`}
 	}
 	usage := usageSections[0]
 
 	options := parseDefaults(doc)
 	formal, err := formalUsage(usage)
 	if err != nil {
-		output = handleError(err, usage)
-		return
+		return nil, handleError(err, usage), err
 	}
 
 	pat, err := parsePattern(formal, &options)
 	if err != nil {
-		output = handleError(err, usage)
-		return
+		return nil, handleError(err, usage), err
 	}
 
 	patternArgv, err := parseArgv(newTokenList(argv, errorUser), &options, optionsFirst)
 	if err != nil {
-		output = handleError(err, usage)
-		return
+		return nil, handleError(err, usage), err
 	}
 	patFlat, err := pat.flat(patternOption)
 	if err != nil {
-		output = handleError(err, usage)
-		return
+		return nil, handleError(err, usage), err
 	}
 	patternOptions := patFlat.unique()
 
 	patFlat, err = pat.flat(patternOptionSSHORTCUT)
 	if err != nil {
-		output = handleError(err, usage)
-		return
+		return nil, handleError(err, usage), err
 	}
 	for _, optionsShortcut := range patFlat {
 		docOptions := parseDefaults(doc)
 		optionsShortcut.children = docOptions.unique().diff(patternOptions)
 	}
 
-	if output = extras(help, version, patternArgv, doc); len(output) > 0 {
-		return
+	if output := extras(help, version, patternArgv, doc); len(output) > 0 {
+		return nil, output, nil
 	}
 
 	err = pat.fix()
 	if err != nil {
-		output = handleError(err, usage)
-		return
+		return nil, handleError(err, usage), err
 	}
 	matched, left, collected := pat.match(&patternArgv, nil)
 	if matched && len(*left) == 0 {
 		patFlat, err = pat.flat(patternDefault)
 		if err != nil {
-			output = handleError(err, usage)
-			return
+			return nil, handleError(err, usage), err
 		}
-		opts = append(patFlat, *collected...).dictionary()
-		return
+		return append(patFlat, *collected...).dictionary(), "", nil
 	}
 
 	// left contains all the non-matched elements, that is, the errors.
@@ -161,8 +151,7 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 		}
 	}
 	err = &UserError{strings.Join(bho, "\n")}
-	output = handleError(err, usage)
-	return
+	return nil, handleError(err, usage), err
 }
 
 func handleError(err error, usage string) string {

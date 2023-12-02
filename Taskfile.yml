@@ -24,6 +24,16 @@ tasks:
     cmds:
       - gotestsum -- -coverprofile=bin/cover.out ./...
 
+  # Show all linters, enabled and disabled:
+  #   golangci-lint help linters
+  #
+  # Pass -E/--enable to enable linter and -D/--disable to disable:
+  #   golangci-lint run --no-config --disable-all -E errcheck ./...
+  lint:
+    desc: Lint the code.
+    cmds:
+      - golangci-lint run ./...
+
   browser:
     desc: "Show code coverage in browser (usage: task test:<subtarget> browser)"
     cmds:

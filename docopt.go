@@ -41,6 +41,7 @@ func MustParse(doc string, argv []string, version string) Opts {
 	parser := &Parser{}
 	opts, err := parser.Parse(doc, argv, version)
 	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	return opts
@@ -54,65 +55,76 @@ func (p *Parser) Parse(doc string, argv []string, version string) (Opts, error) 
 }
 
 func (p *Parser) parse(doc string, args []string, version string) (map[string]any, error) {
-	opts, output, err := parse(doc, args, !p.SkipHelpFlags, version, p.OptionsFirst)
+	usage, err := extractUsage(doc)
+	if err != nil {
+		return nil, err
+	}
+
+	opts, err := parse(doc, args, !p.SkipHelpFlags, version, p.OptionsFirst)
+
 	if errors.Is(err, ErrUser) {
 		// the user gave us bad input
-		fmt.Fprintln(os.Stderr, output)
-		return opts, err
+		//fmt.Fprintln(os.Stderr, err)
+		//fmt.Fprintln(os.Stderr, usage)
+		//return nil, err
+		return nil, fmt.Errorf("%w\n%s", err, usage)
 	}
-	// FIXME why are we looking at the len of output? Seems that this information
-	//   should instead be encoded only in the error...
-	if len(output) > 0 && err == nil {
-		// the user asked for help or --version
-		fmt.Println(output)
-		return opts, ErrHelp
+
+	if errors.Is(err, ErrHelp) {
+		fmt.Println(err)
+		return nil, err
 	}
+
 	return opts, err
 }
 
 // -----------------------------------------------------------------------------
 
-// parse and return a map of args, output and all errors
-func parse(doc string, argv []string, help bool, version string, optionsFirst bool,
-) (map[string]any, string, error) {
-	if argv == nil {
-		return nil, "", fmt.Errorf("%s%w", "nil command-line", ErrLanguage)
-	}
-
+func extractUsage(doc string) (string, error) {
 	usageSections := parseSection("usage:", doc)
-
 	if len(usageSections) == 0 {
-		return nil, "", fmt.Errorf("%s%w", "section 'usage' not found", ErrLanguage)
+		return "", fmt.Errorf("%s%w", "section 'usage' not found", ErrLanguage)
 	}
 	if len(usageSections) > 1 {
-		return nil, "", fmt.Errorf("%s%w", "more than one section 'usage'", ErrLanguage)
+		return "", fmt.Errorf("%s%w", "more than one section 'usage'", ErrLanguage)
 	}
-	usage := usageSections[0]
+	return usageSections[0], nil
+}
 
-	options := parseDefaults(doc)
+// parse and return a map of args, output and all errors
+func parse(doc string, argv []string, help bool, version string, optionsFirst bool,
+) (map[string]any, error) {
+	if argv == nil {
+		return nil, fmt.Errorf("%s%w", "nil command-line", ErrLanguage)
+	}
+	usage, err := extractUsage(doc)
+	if err != nil {
+		return nil, err
+	}
 	formal, err := formalUsage(usage)
 	if err != nil {
-		return nil, handleError(err, usage), err
+		return nil, err
 	}
 
+	options := parseDefaults(doc)
 	pat, err := parsePattern(formal, &options)
 	if err != nil {
-		return nil, handleError(err, usage), err
+		return nil, err
 	}
 
 	patternArgv, err := parseArgv(newTokenList(argv, errorTypeUser), &options, optionsFirst)
 	if err != nil {
-		return nil, handleError(err, usage), err
+		return nil, err
 	}
 	patFlat, err := pat.flat(patternOption)
 	if err != nil {
-		return nil, handleError(err, usage), err
+		return nil, err
 	}
 	patternOptions := patFlat.unique()
 
 	patFlat, err = pat.flat(patternOptionSSHORTCUT)
 	if err != nil {
-		return nil, handleError(err, usage), err
+		return nil, err
 	}
 	for _, optionsShortcut := range patFlat {
 		docOptions := parseDefaults(doc)
@@ -120,20 +132,20 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 	}
 
 	if output := extras(help, version, patternArgv, doc); len(output) > 0 {
-		return nil, output, nil
+		return nil, fmt.Errorf("%s%w", output, ErrHelp)
 	}
 
 	err = pat.fix()
 	if err != nil {
-		return nil, handleError(err, usage), err
+		return nil, err
 	}
 	matched, left, collected := pat.match(&patternArgv, nil)
 	if matched && len(*left) == 0 {
 		patFlat, err = pat.flat(patternDefault)
 		if err != nil {
-			return nil, handleError(err, usage), err
+			return nil, err
 		}
-		return append(patFlat, *collected...).dictionary(), "", nil
+		return append(patFlat, *collected...).dictionary(), nil
 	}
 
 	// left contains all the non-matched elements, that is, the errors.
@@ -150,14 +162,7 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 		}
 	}
 	err = fmt.Errorf("%s%w", strings.Join(bho, "\n"), ErrUser)
-	return nil, handleError(err, usage), err
-}
-
-func handleError(err error, usage string) string {
-	if errors.Is(err, ErrUser) {
-		return strings.TrimSpace(fmt.Sprintf("%s\n%s", err, usage))
-	}
-	return ""
+	return nil, err
 }
 
 func parseSection(name, source string) []string {

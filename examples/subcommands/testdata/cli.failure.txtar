@@ -18,7 +18,7 @@ cmp stderr tcp-flag.txt
 
 
 -- top-command.txt --
-unknown command: "ciccio"
+unknown command: ciccio
 -- top-flag.txt --
 BHO tcp
 Usage:

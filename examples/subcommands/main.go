@@ -66,7 +66,7 @@ func run(args []string) error {
 	case "serial":
 		return cmdSerial(subArgs, cfg.Timeout)
 	default:
-		return fmt.Errorf("unknown command: %q", cfg.Command)
+		return fmt.Errorf("unknown command: %s", cfg.Command)
 	}
 }
 

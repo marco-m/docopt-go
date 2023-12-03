@@ -1115,22 +1115,23 @@ func TestLongOptionsErrorHandling(t *testing.T) {
 	if _, ok := err.(*UserError); !ok {
 		t.Errorf("(%s) %s", reflect.TypeOf(err), err)
 	}
+
 	_, err = testParser.Parse("Usage: prog [--version --verbose]\nOptions: --version\n --verbose", []string{"--ver"}, "")
 	if _, ok := err.(*UserError); !ok {
 		t.Error(err)
 	}
+
 	_, err = testParser.Parse("Usage: prog --long\nOptions: --long ARG", []string{}, "")
-	if _, ok := err.(*LanguageError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
+
 	_, err = testParser.Parse("Usage: prog --long ARG\nOptions: --long ARG", []string{"--long"}, "")
 	if _, ok := err.(*UserError); !ok {
 		t.Errorf("(%s) %s", reflect.TypeOf(err), err)
 	}
+
 	_, err = testParser.Parse("Usage: prog --long=ARG\nOptions: --long", []string{}, "")
-	if _, ok := err.(*LanguageError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
+
 	_, err = testParser.Parse("Usage: prog --long\nOptions: --long", []string{}, "--long=ARG")
 	if _, ok := err.(*UserError); !ok {
 		t.Error(err)
@@ -1139,17 +1140,16 @@ func TestLongOptionsErrorHandling(t *testing.T) {
 
 func TestShortOptionsErrorHandling(t *testing.T) {
 	_, err := testParser.Parse("Usage: prog -x\nOptions: -x  this\n -x  that", []string{}, "")
-	if _, ok := err.(*LanguageError); !ok {
-		t.Errorf("(%s) %s", reflect.TypeOf(err), err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
+
 	_, err = testParser.Parse("Usage: prog", []string{"-x"}, "")
 	if _, ok := err.(*UserError); !ok {
 		t.Error(err)
 	}
+
 	_, err = testParser.Parse("Usage: prog -o\nOptions: -o ARG", []string{}, "")
-	if _, ok := err.(*LanguageError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
+
 	_, err = testParser.Parse("Usage: prog -o ARG\nOptions: -o ARG", []string{"-o"}, "")
 	if _, ok := err.(*UserError); !ok {
 		t.Error(err)
@@ -1158,13 +1158,10 @@ func TestShortOptionsErrorHandling(t *testing.T) {
 
 func TestMatchingParen(t *testing.T) {
 	_, err := testParser.Parse("Usage: prog [a [b]", []string{}, "")
-	if _, ok := err.(*LanguageError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
+
 	_, err = testParser.Parse("Usage: prog [a [b] ] c )", []string{}, "")
-	if _, ok := err.(*LanguageError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
 }
 
 func TestAllowDoubleDash(t *testing.T) {
@@ -1251,13 +1248,10 @@ func TestDocoptPartialHelpRequested(t *testing.T) {
 
 func TestLanguageErrors(t *testing.T) {
 	_, err := testParser.Parse("no usage with colon here", []string{}, "")
-	if _, ok := err.(*LanguageError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
+
 	_, err = testParser.Parse("usage: here \n\n and again usage: here", []string{}, "")
-	if _, ok := err.(*LanguageError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
 }
 
 func TestIssue40ForkErrHelp(t *testing.T) {

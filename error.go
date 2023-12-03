@@ -26,11 +26,5 @@ func (e UserError) Error() string {
 	return e.Msg
 }
 
-// LanguageError records an error with the doc string.
-type LanguageError struct {
-	msg string
-}
-
-func (e LanguageError) Error() string {
-	return e.msg
-}
+// ErrLanguage represents an error with the doc string (the program is wrong).
+var ErrLanguage = errors.New("")

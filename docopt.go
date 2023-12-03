@@ -77,16 +77,16 @@ func (p *Parser) parse(doc string, args []string, version string) (map[string]an
 func parse(doc string, argv []string, help bool, version string, optionsFirst bool,
 ) (map[string]any, string, error) {
 	if argv == nil {
-		return nil, "", &LanguageError{"command-line cannot be nil"}
+		return nil, "", fmt.Errorf("%s%w", "nil command-line", ErrLanguage)
 	}
 
 	usageSections := parseSection("usage:", doc)
 
 	if len(usageSections) == 0 {
-		return nil, "", &LanguageError{`"usage:" (case-insensitive) not found.`}
+		return nil, "", fmt.Errorf("%s%w", "section 'usage' not found", ErrLanguage)
 	}
 	if len(usageSections) > 1 {
-		return nil, "", &LanguageError{`More than one "usage:" (case-insensitive).`}
+		return nil, "", fmt.Errorf("%s%w", "more than one section 'usage'", ErrLanguage)
 	}
 	usage := usageSections[0]
 
@@ -101,7 +101,7 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 		return nil, handleError(err, usage), err
 	}
 
-	patternArgv, err := parseArgv(newTokenList(argv, errorUser), &options, optionsFirst)
+	patternArgv, err := parseArgv(newTokenList(argv, errorTypeUser), &options, optionsFirst)
 	if err != nil {
 		return nil, handleError(err, usage), err
 	}
@@ -382,7 +382,7 @@ func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 			similar = append(similar, o)
 		}
 	}
-	if tokens.err == errorUser && len(similar) == 0 { // if no exact match
+	if tokens.err == errorTypeUser && len(similar) == 0 { // if no exact match
 		similar = patternList{}
 		for _, o := range *options {
 			if strings.HasPrefix(o.long, long) {
@@ -403,7 +403,7 @@ func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 		}
 		opt = newOption("", long, argcount, false)
 		*options = append(*options, opt)
-		if tokens.err == errorUser {
+		if tokens.err == errorTypeUser {
 			var val any
 			if argcount > 0 {
 				val = value
@@ -429,7 +429,7 @@ func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 				}
 			}
 		}
-		if tokens.err == errorUser {
+		if tokens.err == errorTypeUser {
 			if value != nil {
 				opt.value = value
 			} else {
@@ -464,7 +464,7 @@ func parseShorts(tokens *tokenList, options *patternList) (patternList, error) {
 		} else if len(similar) < 1 {
 			opt = newOption(short, "", 0, false)
 			*options = append(*options, opt)
-			if tokens.err == errorUser {
+			if tokens.err == errorTypeUser {
 				opt = newOption(short, "", 0, true)
 			}
 		} else { // why copying is necessary here?
@@ -481,7 +481,7 @@ func parseShorts(tokens *tokenList, options *patternList) (patternList, error) {
 					left = ""
 				}
 			}
-			if tokens.err == errorUser {
+			if tokens.err == errorTypeUser {
 				if value != nil {
 					opt.value = value
 				} else {
@@ -499,7 +499,9 @@ func formalUsage(section string) (string, error) {
 	pu := strings.Fields(section)
 
 	if len(pu) == 0 {
-		return "", &LanguageError{"no fields found in usage (perhaps a spacing error)."}
+		// FIXME find better error message
+		return "", fmt.Errorf("%s%w",
+			"no fields found in section 'usage' (perhaps a spacing error)", ErrLanguage)
 	}
 
 	result := "( "

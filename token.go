@@ -10,16 +10,16 @@ import (
 type errorType int
 
 const (
-	errorUser errorType = iota
-	errorLanguage
+	errorTypeUser errorType = iota
+	errorTypeLanguage
 )
 
 func (e errorType) String() string {
 	switch e {
-	case errorUser:
-		return "errorUser"
-	case errorLanguage:
-		return "errorLanguage"
+	case errorTypeUser:
+		return "errorTypeUser"
+	case errorTypeLanguage:
+		return "errorTypeLanguage"
 	}
 	return "unknownErrorType"
 }
@@ -33,20 +33,20 @@ type token string
 
 func newTokenList(source []string, err errorType) *tokenList {
 	errorFunc := fmt.Errorf
-	if err == errorUser {
+	if err == errorTypeUser {
 		errorFunc = func(format string, a ...any) error {
 			return &UserError{fmt.Sprintf(format, a...)}
 		}
-	} else if err == errorLanguage {
+	} else if err == errorTypeLanguage {
 		errorFunc = func(format string, a ...any) error {
-			return &LanguageError{fmt.Sprintf(format, a...)}
+			return fmt.Errorf("%s%w", fmt.Sprintf(format, a...), ErrLanguage)
 		}
 	}
 	return &tokenList{source, errorFunc, err}
 }
 
 func tokenListFromString(source string) *tokenList {
-	return newTokenList(strings.Fields(source), errorUser)
+	return newTokenList(strings.Fields(source), errorTypeUser)
 }
 
 func tokenListFromPattern(source string) *tokenList {
@@ -65,7 +65,7 @@ func tokenListFromPattern(source string) *tokenList {
 			result = append(result, match[i][1])
 		}
 	}
-	return newTokenList(result, errorLanguage)
+	return newTokenList(result, errorTypeLanguage)
 }
 
 func (t *token) eq(s string) bool {

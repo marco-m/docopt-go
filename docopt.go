@@ -76,8 +76,8 @@ func (p *Parser) parse(doc string, args []string, version string) (map[string]an
 // parse and return a map of args, output and all errors
 func parse(doc string, argv []string, help bool, version string, optionsFirst bool,
 ) (map[string]any, string, error) {
-	if argv == nil && len(os.Args) > 1 {
-		argv = os.Args[1:]
+	if argv == nil {
+		return nil, "", &LanguageError{"command-line cannot be nil"}
 	}
 
 	usageSections := parseSection("usage:", doc)

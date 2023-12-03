@@ -18,6 +18,7 @@
 
 - Remove deprecated `Parse` function.
 - Remove `ParseArgs` function; replaced by the new `Parse`.
+- `Parse`: fail if passed a `nil` command-line.
 - Remove field `HelpHandler` from struct `Parser`.
 - Remove functions for `HelpHandler`: `PrintHelpAndExit`, `PrintHelpOnly`, `NoHelpHandler`.
 

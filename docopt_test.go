@@ -1387,15 +1387,13 @@ func TestIssue68OptionsShortcutDoesNotIncludeOptionsInUsagePattern(t *testing.T)
 }
 
 func TestIssue65EvaluateArgvWhenCalledNotWhenImported(t *testing.T) {
-	os.Args = strings.Fields("prog -a")
-	v, err := testParser.Parse("usage: prog [-ab]", nil, "")
+	v, err := testParser.Parse("usage: prog [-ab]", []string{"-a"}, "")
 	w := Opts{"-a": true, "-b": false}
 	if reflect.DeepEqual(v, w) != true {
 		t.Error(err)
 	}
 
-	os.Args = strings.Fields("prog -b")
-	v, err = testParser.Parse("usage: prog [-ab]", nil, "")
+	v, err = testParser.Parse("usage: prog [-ab]", []string{"-b"}, "")
 	w = Opts{"-a": false, "-b": true}
 	if reflect.DeepEqual(v, w) != true {
 		t.Error(err)

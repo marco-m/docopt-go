@@ -141,23 +141,20 @@ func TestCommands(t *testing.T) {
 	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 }
 
-func TestFormalUsage(t *testing.T) {
+func TestNormalizeUsage(t *testing.T) {
 	doc := `
     Usage: prog [-hv] ARG
            prog N M
 
     prog is a program`
-	usage := parseSection("usage:", doc)[0]
-	if usage != "Usage: prog [-hv] ARG\n           prog N M" {
-		t.FailNow()
-	}
-	formal, err := formalUsage(usage)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if formal != "( [-hv] ARG ) | ( N M )" {
-		t.Fail()
-	}
+
+	usage, err := extractUsage(doc)
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.Equals(usage, "Usage: prog [-hv] ARG\n           prog N M"))
+
+	formal, err := normalizeUsage(usage)
+	qt.Assert(t, qt.IsNil(err))
+	qt.Assert(t, qt.Equals(formal, "( [-hv] ARG ) | ( N M )"))
 }
 
 func TestParseArgv(t *testing.T) {
@@ -1433,12 +1430,33 @@ usage: pit stop`
 	}
 }
 
+func TestParseDefaults(t *testing.T) {
+	help := `
+Usage:
+  foo [options]
+
+Options:
+  --aaa=<arg>
+  --bbb=<arg>  [default: aspide]
+`
+
+	defaults := parseDefaults(help)
+
+	want := patternList{
+		newOption("", "--aaa", 1, nil),
+		newOption("", "--bbb", 1, "aspide"),
+	}
+	qt.Assert(t, qt.DeepEquals(defaults, want))
+}
+
+// https://github.com/docopt/docopt/issues/126
 func TestIssue126DefaultsNotParsedCorrectlyWhenTabs(t *testing.T) {
 	section := "Options:\n\t--foo=<arg>  [default: bar]"
-	v := patternList{newOption("", "--foo", 1, "bar")}
-	if reflect.DeepEqual(parseDefaults(section), v) != true {
-		t.Fail()
-	}
+
+	defaults := parseDefaults(section)
+
+	want := patternList{newOption("", "--foo", 1, "bar")}
+	qt.Assert(t, qt.DeepEquals(defaults, want))
 }
 
 type testcase struct {

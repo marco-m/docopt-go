@@ -131,6 +131,7 @@ func newCommand(name string, value any) *pattern {
 	return &pat
 }
 
+// newOption makes a pattern of type option.
 func newOption(short, long string, argCount int, value any) *pattern {
 	// default: "", "", 0, false
 	var pat pattern

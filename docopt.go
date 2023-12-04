@@ -63,10 +63,6 @@ func (p *Parser) parse(doc string, args []string, version string) (map[string]an
 	opts, err := parse(doc, args, !p.SkipHelpFlags, version, p.OptionsFirst)
 
 	if errors.Is(err, ErrUser) {
-		// the user gave us bad input
-		//fmt.Fprintln(os.Stderr, err)
-		//fmt.Fprintln(os.Stderr, usage)
-		//return nil, err
 		return nil, fmt.Errorf("%w\n%s", err, usage)
 	}
 
@@ -80,17 +76,6 @@ func (p *Parser) parse(doc string, args []string, version string) (map[string]an
 
 // -----------------------------------------------------------------------------
 
-func extractUsage(doc string) (string, error) {
-	usageSections := parseSection("usage:", doc)
-	if len(usageSections) == 0 {
-		return "", fmt.Errorf("%s%w", "section 'usage' not found", ErrLanguage)
-	}
-	if len(usageSections) > 1 {
-		return "", fmt.Errorf("%s%w", "more than one section 'usage'", ErrLanguage)
-	}
-	return usageSections[0], nil
-}
-
 // parse and return a map of args, output and all errors
 func parse(doc string, argv []string, help bool, version string, optionsFirst bool,
 ) (map[string]any, error) {
@@ -101,13 +86,13 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 	if err != nil {
 		return nil, err
 	}
-	formal, err := formalUsage(usage)
+	normalUsage, err := normalizeUsage(usage)
 	if err != nil {
 		return nil, err
 	}
 
 	options := parseDefaults(doc)
-	pat, err := parsePattern(formal, &options)
+	wantPat, err := parsePattern(normalUsage, &options)
 	if err != nil {
 		return nil, err
 	}
@@ -116,17 +101,17 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 	if err != nil {
 		return nil, err
 	}
-	patFlat, err := pat.flat(patternOption)
+	wantPatFlat, err := wantPat.flat(patternOption)
 	if err != nil {
 		return nil, err
 	}
-	patternOptions := patFlat.unique()
+	patternOptions := wantPatFlat.unique()
 
-	patFlat, err = pat.flat(patternOptionSSHORTCUT)
+	wantPatFlat, err = wantPat.flat(patternOptionSSHORTCUT)
 	if err != nil {
 		return nil, err
 	}
-	for _, optionsShortcut := range patFlat {
+	for _, optionsShortcut := range wantPatFlat {
 		docOptions := parseDefaults(doc)
 		optionsShortcut.Children = docOptions.unique().diff(patternOptions)
 	}
@@ -135,27 +120,33 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 		return nil, fmt.Errorf("%s%w", output, ErrHelp)
 	}
 
-	err = pat.fix()
+	err = wantPat.fix()
 	if err != nil {
 		return nil, err
 	}
-	matched, left, collected := pat.match(&patternArgv, nil)
+	matched, left, collected := wantPat.match(&patternArgv, nil)
 	if matched && len(*left) == 0 {
-		patFlat, err = pat.flat(patternDefault)
+		wantPatFlat, err = wantPat.flat(patternDefault)
 		if err != nil {
 			return nil, err
 		}
-		return append(patFlat, *collected...).dictionary(), nil
+		opts := append(wantPatFlat, *collected...).dictionary()
+		return opts, nil
 	}
 
-	// left contains all the non-matched elements, that is, the errors.
 	// FIXME
+	// Sigh. This is not that simple...
+	// left contains all the non-matched elements, that is, the errors.
 	bho := make([]string, 0, len(*left))
 	for _, unknown := range *left {
-		if unknown.Type == patternOption {
+		switch unknown.Type {
+		case patternOption:
 			bho = append(bho, fmt.Sprintf("unknown %s: %s",
 				unknown.Type, unknown.Name))
-		} else {
+		case patternArgument:
+			bho = append(bho, fmt.Sprintf("unknown %s: %v",
+				unknown.Type, unknown.Value))
+		default:
 			// FIXME too optimistic ...
 			bho = append(bho, fmt.Sprintf("unknown %s: %s %v",
 				unknown.Type, unknown.Name, unknown.Value))
@@ -165,9 +156,10 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 	return nil, err
 }
 
+// Return a list of all the sections 'Name' in 'source'.
 func parseSection(name, source string) []string {
-	p := regexp.MustCompile(`(?im)^([^\n]*` + name + `[^\n]*\n?(?:[ \t].*?(?:\n|$))*)`)
-	s := p.FindAllString(source, -1)
+	re := regexp.MustCompile(`(?im)^([^\n]*` + name + `[^\n]*\n?(?:[ \t].*?(?:\n|$))*)`)
+	s := re.FindAllString(source, -1)
 	if s == nil {
 		s = []string{}
 	}
@@ -177,16 +169,18 @@ func parseSection(name, source string) []string {
 	return s
 }
 
+// parseDefaults inspects all the "options" sections in 'doc' and returns
 func parseDefaults(doc string) patternList {
 	defaults := patternList{}
-	p := regexp.MustCompile(`\n[ \t]*(-\S+?)`)
-	for _, s := range parseSection("options:", doc) {
+	re := regexp.MustCompile(`\n[ \t]*(-\S+?)`)
+
+	for _, se := range parseSection("options:", doc) {
 		// FIXME corner case "bla: options: --foo"
-		_, _, s = stringPartition(s, ":") // get rid of "options:"
-		split := p.Split("\n"+s, -1)[1:]
-		match := p.FindAllStringSubmatch("\n"+s, -1)
-		for i := range split {
-			optionDescription := match[i][1] + split[i]
+		_, _, se = stringPartition(se, ":") // get rid of "options:"
+		splits := re.Split("\n"+se, -1)[1:]
+		matches := re.FindAllStringSubmatch("\n"+se, -1)
+		for i := range splits {
+			optionDescription := matches[i][1] + splits[i]
 			if strings.HasPrefix(optionDescription, "-") {
 				defaults = append(defaults, parseOption(optionDescription))
 			}
@@ -498,27 +492,32 @@ func parseShorts(tokens *tokenList, options *patternList) (patternList, error) {
 	return parsed, nil
 }
 
-func formalUsage(section string) (string, error) {
-	_, _, section = stringPartition(section, ":") // drop "usage:"
-	pu := strings.Fields(section)
+// normalizeUsage takes a possibly multi-line "usage" section and returns a
+// single line in the canonical form.
+func normalizeUsage(usage string) (string, error) {
+	_, _, usage = stringPartition(usage, ":") // drop "usage:"
+	tokens := strings.Fields(usage)
 
-	if len(pu) == 0 {
+	if len(tokens) == 0 {
 		// FIXME find better error message
 		return "", fmt.Errorf("%s%w",
 			"no fields found in section 'usage' (perhaps a spacing error)", ErrLanguage)
 	}
 
-	result := "( "
-	for _, s := range pu[1:] {
-		if s == pu[0] {
-			result += ") | ( "
+	progName := tokens[0]
+	var bld strings.Builder
+	bld.WriteString("( ")
+	for _, s := range tokens[1:] {
+		if s == progName {
+			// usage was multi-line and we are at the beginning of a line.
+			bld.WriteString(") | ( ")
 		} else {
-			result += s + " "
+			bld.WriteString(s + " ")
 		}
 	}
-	result += ")"
+	bld.WriteString(")")
 
-	return result, nil
+	return bld.String(), nil
 }
 
 func extras(help bool, version string, options patternList, doc string) string {
@@ -537,6 +536,18 @@ func extras(help bool, version string, options patternList, doc string) string {
 		}
 	}
 	return ""
+}
+
+// extractUsage returns the "usage" section from the whole help text.
+func extractUsage(doc string) (string, error) {
+	usageSections := parseSection("usage:", doc)
+	if len(usageSections) == 0 {
+		return "", fmt.Errorf("%s%w", "section 'usage' not found", ErrLanguage)
+	}
+	if len(usageSections) > 1 {
+		return "", fmt.Errorf("%s%w", "more than one section 'usage'", ErrLanguage)
+	}
+	return usageSections[0], nil
 }
 
 func stringPartition(s, sep string) (string, string, string) {

@@ -16,15 +16,16 @@ import "errors"
 //	 ...
 var ErrHelp = errors.New("user requested help")
 
-// UserError records an error with program arguments.
-// Can be used also by client code to report specific CLI validation errors.
-type UserError struct {
-	Msg string
-}
-
-func (e UserError) Error() string {
-	return e.Msg
-}
+// ErrUser represents an error in the command-line arguments (the user made an
+// invocation error).
+//
+// If desired, client code can report specific CLI validation errors by
+// wrapping ErrUser as follows:
+//
+//	fmt.Errorf("%s%w", "write specific error here", ErrUser)
+//
+// Note: do not add spaces around the wrapping verb %w.
+var ErrUser = errors.New("")
 
 // ErrLanguage represents an error with the doc string (the program is wrong).
 var ErrLanguage = errors.New("")

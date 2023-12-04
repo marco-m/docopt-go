@@ -55,8 +55,7 @@ func (p *Parser) Parse(doc string, argv []string, version string) (Opts, error) 
 
 func (p *Parser) parse(doc string, args []string, version string) (map[string]any, error) {
 	opts, output, err := parse(doc, args, !p.SkipHelpFlags, version, p.OptionsFirst)
-	var userError *UserError
-	if errors.As(err, &userError) {
+	if errors.Is(err, ErrUser) {
 		// the user gave us bad input
 		fmt.Fprintln(os.Stderr, output)
 		return opts, err
@@ -150,12 +149,12 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 				unknown.t, unknown.name, unknown.value))
 		}
 	}
-	err = &UserError{strings.Join(bho, "\n")}
+	err = fmt.Errorf("%s%w", strings.Join(bho, "\n"), ErrUser)
 	return nil, handleError(err, usage), err
 }
 
 func handleError(err error, usage string) string {
-	if _, ok := err.(*UserError); ok {
+	if errors.Is(err, ErrUser) {
 		return strings.TrimSpace(fmt.Sprintf("%s\n%s", err, usage))
 	}
 	return ""

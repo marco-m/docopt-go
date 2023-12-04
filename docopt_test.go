@@ -138,9 +138,7 @@ func TestCommands(t *testing.T) {
 		t.Error(err)
 	}
 	_, err := testParser.Parse("Usage: prog a b", []string{"b", "a"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 }
 
 func TestFormalUsage(t *testing.T) {
@@ -1112,30 +1110,22 @@ func TestPatternFixIdentities2(t *testing.T) {
 
 func TestLongOptionsErrorHandling(t *testing.T) {
 	_, err := testParser.Parse("Usage: prog", []string{"--non-existent"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Errorf("(%s) %s", reflect.TypeOf(err), err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 
 	_, err = testParser.Parse("Usage: prog [--version --verbose]\nOptions: --version\n --verbose", []string{"--ver"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 
 	_, err = testParser.Parse("Usage: prog --long\nOptions: --long ARG", []string{}, "")
 	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
 
 	_, err = testParser.Parse("Usage: prog --long ARG\nOptions: --long ARG", []string{"--long"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Errorf("(%s) %s", reflect.TypeOf(err), err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 
 	_, err = testParser.Parse("Usage: prog --long=ARG\nOptions: --long", []string{}, "")
 	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
 
 	_, err = testParser.Parse("Usage: prog --long\nOptions: --long", []string{}, "--long=ARG")
-	if _, ok := err.(*UserError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 }
 
 func TestShortOptionsErrorHandling(t *testing.T) {
@@ -1143,17 +1133,13 @@ func TestShortOptionsErrorHandling(t *testing.T) {
 	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
 
 	_, err = testParser.Parse("Usage: prog", []string{"-x"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 
 	_, err = testParser.Parse("Usage: prog -o\nOptions: -o ARG", []string{}, "")
 	qt.Assert(t, qt.ErrorIs(err, ErrLanguage))
 
 	_, err = testParser.Parse("Usage: prog -o ARG\nOptions: -o ARG", []string{"-o"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 }
 
 func TestMatchingParen(t *testing.T) {
@@ -1172,9 +1158,8 @@ func TestAllowDoubleDash(t *testing.T) {
 		t.Error(err)
 	}
 	_, err := testParser.Parse("usage: prog [-o] <arg>\noptions:-o", []string{"-o"}, "")
-	if _, ok := err.(*UserError); !ok { // "--" is not allowed; FIXME?
-		t.Error(err)
-	}
+	// "--" is not allowed; FIXME?
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 }
 
 func TestDocopt1(t *testing.T) {
@@ -1225,10 +1210,10 @@ func TestDocoptFailure(t *testing.T) {
     `
 
 	_, err := testParser.Parse(doc, []string{"-v", "input.py", "output.py"}, "") // does not match
-	qt.Assert(t, qt.ErrorAs(err, new(*UserError)))
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 
 	_, err = testParser.Parse(doc, []string{"--fake"}, "")
-	qt.Assert(t, qt.ErrorAs(err, new(*UserError)))
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 }
 
 // FIXME I do not want partial match actually!
@@ -1287,9 +1272,7 @@ func TestCountMultipleFlags(t *testing.T) {
 		t.Error(err)
 	}
 	_, err := testParser.Parse("usage: prog [-vv]", []string{"-vvv"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Error(err)
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 	if v, err := testParser.Parse("usage: prog [-v | -vv | -vvv]", []string{"-vvv"}, ""); reflect.DeepEqual(v, Opts{"-v": 3}) != true {
 		t.Error(err)
 	}
@@ -1303,22 +1286,16 @@ func TestCountMultipleFlags(t *testing.T) {
 
 func TestAnyOptionsParameter(t *testing.T) {
 	_, err := testParser.Parse("usage: prog [options]", []string{"-foo", "--bar", "--spam=eggs"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Fail()
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 
 	_, err = testParser.Parse("usage: prog [options]", []string{"--foo", "--bar", "--bar"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Fail()
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
+
 	_, err = testParser.Parse("usage: prog [options]", []string{"--bar", "--bar", "--bar", "-ffff"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Fail()
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
+
 	_, err = testParser.Parse("usage: prog [options]", []string{"--long=arg", "--long=another"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Fail()
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 }
 
 func TestDefaultValueForPositionalArguments(t *testing.T) {
@@ -1396,15 +1373,11 @@ func TestIssue65EvaluateArgvWhenCalledNotWhenImported(t *testing.T) {
 
 func TestIssue71DoubleDashIsNotAValidOptionArgument(t *testing.T) {
 	_, err := testParser.Parse("usage: prog [--log=LEVEL] [--] <args>...", []string{"--log", "--", "1", "2"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Fail()
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 
 	_, err = testParser.Parse(`usage: prog [-l LEVEL] [--] <args>...
                   options: -l LEVEL`, []string{"-l", "--", "1", "2"}, "")
-	if _, ok := err.(*UserError); !ok {
-		t.Fail()
-	}
+	qt.Assert(t, qt.ErrorIs(err, ErrUser))
 }
 
 func TestParseSection(t *testing.T) {
@@ -1468,6 +1441,15 @@ func TestIssue126DefaultsNotParsedCorrectlyWhenTabs(t *testing.T) {
 	}
 }
 
+type testcase struct {
+	id            int
+	doc           string
+	prog          string
+	argv          []string
+	expect        Opts
+	wantUserError bool
+}
+
 // conf file based test cases
 func TestFileTestcases(t *testing.T) {
 	filenames := []string{"testcases.docopt", "test_golang.docopt"}
@@ -1483,26 +1465,20 @@ func TestFileTestcases(t *testing.T) {
 		}
 		for _, c := range tests {
 			result, err := testParser.Parse(c.doc, c.argv, "")
-			if _, ok := err.(*UserError); c.userError && !ok {
-				// expected a user-error
-				t.Error("testcase:", c.id, "result:", result, "error:", err)
-			} else if _, ok := err.(*UserError); !c.userError && ok {
-				// unexpected user-error
-				t.Error("testcase:", c.id, "error:", err, "result:", result)
-			} else if reflect.DeepEqual(c.expect, result) != true {
-				t.Error("testcase:", c.id, "result:", result, "expect:", c.expect)
+			if c.wantUserError {
+				qt.Assert(t, qt.ErrorIs(err, ErrUser))
+			} else {
+				qt.Assert(t, qt.Not(qt.ErrorIs(err, ErrUser)))
+			}
+
+			// FIXME split test in success and failure!
+			// logic is complicated and buggy
+
+			if c.expect != nil {
+				qt.Assert(t, qt.DeepEquals(result, c.expect))
 			}
 		}
 	}
-}
-
-type testcase struct {
-	id        int
-	doc       string
-	prog      string
-	argv      []string
-	expect    Opts
-	userError bool
 }
 
 func parseTest(raw []byte) ([]testcase, error) {

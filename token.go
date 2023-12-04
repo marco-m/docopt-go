@@ -35,7 +35,7 @@ func newTokenList(source []string, err errorType) *tokenList {
 	errorFunc := fmt.Errorf
 	if err == errorTypeUser {
 		errorFunc = func(format string, a ...any) error {
-			return &UserError{fmt.Sprintf(format, a...)}
+			return fmt.Errorf("%s%w", fmt.Sprintf(format, a...), ErrUser)
 		}
 	} else if err == errorTypeLanguage {
 		errorFunc = func(format string, a ...any) error {

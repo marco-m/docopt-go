@@ -107,13 +107,13 @@ func TestOption(t *testing.T) {
 }
 
 func TestOptionName(t *testing.T) {
-	if newOption("-h", "", 0, false).name != "-h" {
+	if newOption("-h", "", 0, false).Name != "-h" {
 		t.Fail()
 	}
-	if newOption("-h", "--help", 0, false).name != "--help" {
+	if newOption("-h", "--help", 0, false).Name != "--help" {
 		t.Fail()
 	}
-	if newOption("", "--help", 0, false).name != "--help" {
+	if newOption("", "--help", 0, false).Name != "--help" {
 		t.Fail()
 	}
 }
@@ -1067,18 +1067,18 @@ func TestPatternFixIdentities1(t *testing.T) {
 	p := newRequired(
 		newArgument("N", nil),
 		newArgument("N", nil))
-	if len(p.children) < 2 {
+	if len(p.Children) < 2 {
 		t.FailNow()
 	}
-	if p.children[0].eq(p.children[1]) != true {
+	if p.Children[0].eq(p.Children[1]) != true {
 		t.Fail()
 	}
-	if p.children[0] == p.children[1] {
+	if p.Children[0] == p.Children[1] {
 		t.Fail()
 	}
 	err := p.fixIdentities(nil)
 	qt.Assert(t, qt.IsNil(err))
-	if p.children[0] != p.children[1] {
+	if p.Children[0] != p.Children[1] {
 		t.Fail()
 	}
 }
@@ -1089,21 +1089,21 @@ func TestPatternFixIdentities2(t *testing.T) {
 			newArgument("X", nil),
 			newArgument("N", nil)),
 		newArgument("N", nil))
-	if len(p.children) < 2 {
+	if len(p.Children) < 2 {
 		t.FailNow()
 	}
-	if len(p.children[0].children) < 2 {
+	if len(p.Children[0].Children) < 2 {
 		t.FailNow()
 	}
-	if p.children[0].children[1].eq(p.children[1]) != true {
+	if p.Children[0].Children[1].eq(p.Children[1]) != true {
 		t.Fail()
 	}
-	if p.children[0].children[1] == p.children[1] {
+	if p.Children[0].Children[1] == p.Children[1] {
 		t.Fail()
 	}
 	err := p.fixIdentities(nil)
 	qt.Assert(t, qt.IsNil(err))
-	if p.children[0].children[1] != p.children[1] {
+	if p.Children[0].Children[1] != p.Children[1] {
 		t.Fail()
 	}
 }

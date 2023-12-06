@@ -22,6 +22,7 @@ tasks:
   test:
     desc: Run the tests
     cmds:
+      - mkdir -p bin
       - gotestsum -- -coverprofile=bin/cover.out ./...
 
   # Show all linters, enabled and disabled:

@@ -64,25 +64,25 @@ func (pt patternType) String() string {
 }
 
 type pattern struct {
-	t patternType
+	Type patternType
 
-	children patternList
+	Children patternList
 
-	name  string
-	value any
+	Name  string
+	Value any
 
-	short    string
-	long     string
-	argcount int
+	Short    string
+	Long     string
+	ArgCount int
 }
 
 type patternList []*pattern
 
 func newBranchPattern(t patternType, pl ...*pattern) *pattern {
 	var p pattern
-	p.t = t
-	p.children = make(patternList, len(pl))
-	copy(p.children, pl)
+	p.Type = t
+	p.Children = make(patternList, len(pl))
+	copy(p.Children, pl)
 	return &p
 }
 
@@ -104,16 +104,16 @@ func newOptional(pl ...*pattern) *pattern {
 
 func newOptionsShortcut() *pattern {
 	var p pattern
-	p.t = patternOptionSSHORTCUT
+	p.Type = patternOptionSSHORTCUT
 	return &p
 }
 
 func newLeafPattern(t patternType, name string, value any) *pattern {
 	// default: value=nil
 	var p pattern
-	p.t = t
-	p.name = name
-	p.value = value
+	p.Type = t
+	p.Name = name
+	p.Value = value
 	return &p
 }
 
@@ -125,49 +125,49 @@ func newArgument(name string, value any) *pattern {
 func newCommand(name string, value any) *pattern {
 	// default: value=false
 	var p pattern
-	p.t = patternCommand
-	p.name = name
-	p.value = value
+	p.Type = patternCommand
+	p.Name = name
+	p.Value = value
 	return &p
 }
 
 func newOption(short, long string, argcount int, value any) *pattern {
 	// default: "", "", 0, false
 	var p pattern
-	p.t = patternOption
-	p.short = short
-	p.long = long
+	p.Type = patternOption
+	p.Short = short
+	p.Long = long
 	if long != "" {
-		p.name = long
+		p.Name = long
 	} else {
-		p.name = short
+		p.Name = short
 	}
-	p.argcount = argcount
+	p.ArgCount = argcount
 	if value == false && argcount > 0 {
-		p.value = nil
+		p.Value = nil
 	} else {
-		p.value = value
+		p.Value = value
 	}
 	return &p
 }
 
 func (p *pattern) flat(types patternType) (patternList, error) {
-	if p.t&patternLeaf != 0 {
+	if p.Type&patternLeaf != 0 {
 		if types == patternDefault {
 			types = patternAll
 		}
-		if p.t&types != 0 {
+		if p.Type&types != 0 {
 			return patternList{p}, nil
 		}
 		return patternList{}, nil
 	}
 
-	if p.t&patternBranch != 0 {
-		if p.t&types != 0 {
+	if p.Type&patternBranch != 0 {
+		if p.Type&types != 0 {
 			return patternList{p}, nil
 		}
 		result := patternList{}
-		for _, child := range p.children {
+		for _, child := range p.Children {
 			childFlat, err := child.flat(types)
 			if err != nil {
 				return nil, err
@@ -176,7 +176,7 @@ func (p *pattern) flat(types patternType) (patternList, error) {
 		}
 		return result, nil
 	}
-	return nil, fmt.Errorf("unknown pattern type: %d, %d", p.t, types)
+	return nil, fmt.Errorf("unknown pattern type: %d, %d", p.Type, types)
 }
 
 func (p *pattern) fix() error {
@@ -190,7 +190,7 @@ func (p *pattern) fix() error {
 
 func (p *pattern) fixIdentities(uniq patternList) error {
 	// Make pattern-tree tips point to same object if they are equal.
-	if p.t&patternBranch == 0 {
+	if p.Type&patternBranch == 0 {
 		return nil
 	}
 	if uniq == nil {
@@ -200,13 +200,13 @@ func (p *pattern) fixIdentities(uniq patternList) error {
 		}
 		uniq = pFlat.unique()
 	}
-	for i, child := range p.children {
-		if child.t&patternBranch == 0 {
+	for i, child := range p.Children {
+		if child.Type&patternBranch == 0 {
 			ind, err := uniq.index(child)
 			if err != nil {
 				return err
 			}
-			p.children[i] = uniq[ind]
+			p.Children[i] = uniq[ind]
 		} else {
 			err := child.fixIdentities(uniq)
 			if err != nil {
@@ -221,8 +221,8 @@ func (p *pattern) fixRepeatingArguments() {
 	// Fix elements that should accumulate/increment values.
 	var either []patternList
 
-	for _, child := range p.transform().children {
-		either = append(either, child.children)
+	for _, child := range p.transform().Children {
+		either = append(either, child.Children)
 	}
 	for _, cas := range either {
 		casMultiple := patternList{}
@@ -232,17 +232,17 @@ func (p *pattern) fixRepeatingArguments() {
 			}
 		}
 		for _, e := range casMultiple {
-			if e.t == patternArgument || e.t == patternOption && e.argcount > 0 {
-				switch v := e.value.(type) {
+			if e.Type == patternArgument || e.Type == patternOption && e.ArgCount > 0 {
+				switch v := e.Value.(type) {
 				case string:
-					e.value = strings.Fields(v)
+					e.Value = strings.Fields(v)
 				case []string:
 				default:
-					e.value = []string{}
+					e.Value = []string{}
 				}
 			}
-			if e.t == patternCommand || e.t == patternOption && e.argcount == 0 {
-				e.value = 0
+			if e.Type == patternCommand || e.Type == patternOption && e.ArgCount == 0 {
+				e.Value = 0
 			}
 		}
 	}
@@ -252,10 +252,10 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 	if collected == nil {
 		collected = &patternList{}
 	}
-	if p.t&patternRequired != 0 {
+	if p.Type&patternRequired != 0 {
 		l := left
 		c := collected
-		for _, p := range p.children {
+		for _, p := range p.Children {
 			var matched bool
 			matched, l, c = p.match(l, c)
 			if !matched {
@@ -263,14 +263,14 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 			}
 		}
 		return true, l, c
-	} else if p.t&patternOptionAL != 0 || p.t&patternOptionSSHORTCUT != 0 {
-		for _, p := range p.children {
+	} else if p.Type&patternOptionAL != 0 || p.Type&patternOptionSSHORTCUT != 0 {
+		for _, p := range p.Children {
 			_, left, collected = p.match(left, collected)
 		}
 		return true, left, collected
-	} else if p.t&patternOneOrMore != 0 {
-		if len(p.children) != 1 {
-			panic("OneOrMore.match(): assert len(p.children) == 1")
+	} else if p.Type&patternOneOrMore != 0 {
+		if len(p.Children) != 1 {
+			panic("OneOrMore.match(): assert len(p.Children) == 1")
 		}
 		l := left
 		c := collected
@@ -279,7 +279,7 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 		times := 0
 		for matched {
 			// could it be that something didn't match but changed l or c?
-			matched, l, c = p.children[0].match(l, c)
+			matched, l, c = p.Children[0].match(l, c)
 			if matched {
 				times++
 			}
@@ -292,7 +292,7 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 			return true, l, c
 		}
 		return false, left, collected
-	} else if p.t&patternEither != 0 {
+	} else if p.Type&patternEither != 0 {
 		type outcomeStruct struct {
 			matched   bool
 			left      *patternList
@@ -300,7 +300,7 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 			length    int
 		}
 		outcomes := []outcomeStruct{}
-		for _, p := range p.children {
+		for _, p := range p.Children {
 			matched, l, c := p.match(left, collected)
 			outcome := outcomeStruct{matched, l, c, len(*l)}
 			if matched {
@@ -318,7 +318,7 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 			return outcomes[minIndex].matched, outcomes[minIndex].left, outcomes[minIndex].collected
 		}
 		return false, left, collected
-	} else if p.t&patternLeaf != 0 {
+	} else if p.Type&patternLeaf != 0 {
 		pos, match := p.singleMatch(left)
 		var increment any
 		if match == nil {
@@ -329,36 +329,36 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 		leftAlt = append(leftAlt, (*left)[pos+1:]...)
 		sameName := patternList{}
 		for _, a := range *collected {
-			if a.name == p.name {
+			if a.Name == p.Name {
 				sameName = append(sameName, a)
 			}
 		}
 
-		switch p.value.(type) {
+		switch p.Value.(type) {
 		case int, []string:
-			switch p.value.(type) {
+			switch p.Value.(type) {
 			case int:
 				increment = 1
 			case []string:
-				switch v := match.value.(type) {
+				switch v := match.Value.(type) {
 				case string:
 					increment = []string{v}
 				default:
-					increment = match.value
+					increment = match.Value
 				}
 			}
 			if len(sameName) == 0 {
-				match.value = increment
+				match.Value = increment
 				collectedMatch := make(patternList, len(*collected), len(*collected)+1)
 				copy(collectedMatch, *collected)
 				collectedMatch = append(collectedMatch, match)
 				return true, &leftAlt, &collectedMatch
 			}
-			switch sameName[0].value.(type) {
+			switch sameName[0].Value.(type) {
 			case int:
-				sameName[0].value = sameName[0].value.(int) + increment.(int)
+				sameName[0].Value = sameName[0].Value.(int) + increment.(int)
 			case []string:
-				sameName[0].value = append(sameName[0].value.([]string), increment.([]string)...)
+				sameName[0].Value = append(sameName[0].Value.([]string), increment.([]string)...)
 			}
 			return true, &leftAlt, collected
 		}
@@ -371,26 +371,26 @@ func (p *pattern) match(left *patternList, collected *patternList) (bool, *patte
 }
 
 func (p *pattern) singleMatch(left *patternList) (int, *pattern) {
-	if p.t&patternArgument != 0 {
+	if p.Type&patternArgument != 0 {
 		for n, pat := range *left {
-			if pat.t&patternArgument != 0 {
-				return n, newArgument(p.name, pat.value)
+			if pat.Type&patternArgument != 0 {
+				return n, newArgument(p.Name, pat.Value)
 			}
 		}
 		return -1, nil
-	} else if p.t&patternCommand != 0 {
+	} else if p.Type&patternCommand != 0 {
 		for n, pat := range *left {
-			if pat.t&patternArgument != 0 {
-				if pat.value == p.name {
-					return n, newCommand(p.name, true)
+			if pat.Type&patternArgument != 0 {
+				if pat.Value == p.Name {
+					return n, newCommand(p.Name, true)
 				}
 				break
 			}
 		}
 		return -1, nil
-	} else if p.t&patternOption != 0 {
+	} else if p.Type&patternOption != 0 {
 		for n, pat := range *left {
-			if p.name == pat.name {
+			if p.Name == pat.Name {
 				return n, pat
 			}
 		}
@@ -400,19 +400,19 @@ func (p *pattern) singleMatch(left *patternList) (int, *pattern) {
 }
 
 func (p *pattern) String() string {
-	if p.t&patternOption != 0 {
-		return fmt.Sprintf("%s(%s, %s, %d, %+v)", p.t, p.short, p.long, p.argcount, p.value)
-	} else if p.t&patternLeaf != 0 {
-		return fmt.Sprintf("%s(%s, %+v)", p.t, p.name, p.value)
-	} else if p.t&patternBranch != 0 {
+	if p.Type&patternOption != 0 {
+		return fmt.Sprintf("%s(%s, %s, %d, %+v)", p.Type, p.Short, p.Long, p.ArgCount, p.Value)
+	} else if p.Type&patternLeaf != 0 {
+		return fmt.Sprintf("%s(%s, %+v)", p.Type, p.Name, p.Value)
+	} else if p.Type&patternBranch != 0 {
 		result := ""
-		for i, child := range p.children {
+		for i, child := range p.Children {
 			if i > 0 {
 				result += ", "
 			}
 			result += child.String()
 		}
-		return fmt.Sprintf("%s(%s)", p.t, result)
+		return fmt.Sprintf("%s(%s)", p.Type, result)
 	}
 	panic("unmatched type")
 }
@@ -436,28 +436,28 @@ func (p *pattern) transform() *pattern {
 		groups = groups[1:]
 		var child *pattern
 		for _, c := range children {
-			if c.t&parents != 0 {
+			if c.Type&parents != 0 {
 				child = c
 				break
 			}
 		}
 		if child != nil {
 			children.remove(child)
-			if child.t&patternEither != 0 {
-				for _, c := range child.children {
+			if child.Type&patternEither != 0 {
+				for _, c := range child.Children {
 					r := patternList{}
 					r = append(r, c)
 					r = append(r, children...)
 					groups = append(groups, r)
 				}
-			} else if child.t&patternOneOrMore != 0 {
+			} else if child.Type&patternOneOrMore != 0 {
 				r := patternList{}
-				r = append(r, child.children.double()...)
+				r = append(r, child.Children.double()...)
 				r = append(r, children...)
 				groups = append(groups, r)
 			} else {
 				r := patternList{}
-				r = append(r, child.children...)
+				r = append(r, child.Children...)
 				r = append(r, children...)
 				groups = append(groups, r)
 			}
@@ -544,7 +544,7 @@ func (pl *patternList) remove(p *pattern) {
 func (pl patternList) dictionary() map[string]any {
 	dict := make(map[string]any)
 	for _, a := range pl {
-		dict[a.name] = a.value
+		dict[a.Name] = a.Value
 	}
 	return dict
 }

@@ -128,7 +128,7 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 	}
 	for _, optionsShortcut := range patFlat {
 		docOptions := parseDefaults(doc)
-		optionsShortcut.children = docOptions.unique().diff(patternOptions)
+		optionsShortcut.Children = docOptions.unique().diff(patternOptions)
 	}
 
 	if output := extras(help, version, patternArgv, doc); len(output) > 0 {
@@ -152,13 +152,13 @@ func parse(doc string, argv []string, help bool, version string, optionsFirst bo
 	// FIXME
 	bho := make([]string, 0, len(*left))
 	for _, unknown := range *left {
-		if unknown.t == patternOption {
+		if unknown.Type == patternOption {
 			bho = append(bho, fmt.Sprintf("unknown %s: %s",
-				unknown.t, unknown.name))
+				unknown.Type, unknown.Name))
 		} else {
 			// FIXME too optimistic ...
 			bho = append(bho, fmt.Sprintf("unknown %s: %s %v",
-				unknown.t, unknown.name, unknown.value))
+				unknown.Type, unknown.Name, unknown.Value))
 		}
 	}
 	err = fmt.Errorf("%s%w", strings.Join(bho, "\n"), ErrUser)
@@ -382,14 +382,14 @@ func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 	}
 	similar := patternList{}
 	for _, o := range *options {
-		if o.long == long {
+		if o.Long == long {
 			similar = append(similar, o)
 		}
 	}
 	if tokens.err == errorTypeUser && len(similar) == 0 { // if no exact match
 		similar = patternList{}
 		for _, o := range *options {
-			if strings.HasPrefix(o.long, long) {
+			if strings.HasPrefix(o.Long, long) {
 				similar = append(similar, o)
 			}
 		}
@@ -397,7 +397,7 @@ func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 	if len(similar) > 1 { // might be simply specified ambiguously 2+ times?
 		similarLong := make([]string, len(similar))
 		for i, s := range similar {
-			similarLong[i] = s.long
+			similarLong[i] = s.Long
 		}
 		return nil, tokens.errorFunc("%s is not a unique prefix: %s?", long, strings.Join(similarLong, ", "))
 	} else if len(similar) < 1 {
@@ -417,15 +417,15 @@ func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 			opt = newOption("", long, argcount, val)
 		}
 	} else {
-		opt = newOption(similar[0].short, similar[0].long, similar[0].argcount, similar[0].value)
-		if opt.argcount == 0 {
+		opt = newOption(similar[0].Short, similar[0].Long, similar[0].ArgCount, similar[0].Value)
+		if opt.ArgCount == 0 {
 			if value != nil {
-				return nil, tokens.errorFunc("%s must not have an argument", opt.long)
+				return nil, tokens.errorFunc("%s must not have an argument", opt.Long)
 			}
 		} else {
 			if value == nil {
 				if tokens.current().match(true, "--") {
-					return nil, tokens.errorFunc("%s requires argument", opt.long)
+					return nil, tokens.errorFunc("%s requires argument", opt.Long)
 				}
 				moved := tokens.move()
 				if moved != nil {
@@ -435,9 +435,9 @@ func parseLong(tokens *tokenList, options *patternList) (patternList, error) {
 		}
 		if tokens.err == errorTypeUser {
 			if value != nil {
-				opt.value = value
+				opt.Value = value
 			} else {
-				opt.value = true
+				opt.Value = true
 			}
 		}
 	}
@@ -459,7 +459,7 @@ func parseShorts(tokens *tokenList, options *patternList) (patternList, error) {
 		left = left[1:]
 		similar := patternList{}
 		for _, o := range *options {
-			if o.short == short {
+			if o.Short == short {
 				similar = append(similar, o)
 			}
 		}
@@ -472,9 +472,9 @@ func parseShorts(tokens *tokenList, options *patternList) (patternList, error) {
 				opt = newOption(short, "", 0, true)
 			}
 		} else { // why copying is necessary here?
-			opt = newOption(short, similar[0].long, similar[0].argcount, similar[0].value)
+			opt = newOption(short, similar[0].Long, similar[0].ArgCount, similar[0].Value)
 			var value any
-			if opt.argcount > 0 {
+			if opt.ArgCount > 0 {
 				if left == "" {
 					if tokens.current().match(true, "--") {
 						return nil, tokens.errorFunc("%s requires argument", short)
@@ -487,9 +487,9 @@ func parseShorts(tokens *tokenList, options *patternList) (patternList, error) {
 			}
 			if tokens.err == errorTypeUser {
 				if value != nil {
-					opt.value = value
+					opt.Value = value
 				} else {
-					opt.value = true
+					opt.Value = true
 				}
 			}
 		}
@@ -524,14 +524,14 @@ func formalUsage(section string) (string, error) {
 func extras(help bool, version string, options patternList, doc string) string {
 	if help {
 		for _, o := range options {
-			if (o.name == "-h" || o.name == "--help") && o.value == true {
+			if (o.Name == "-h" || o.Name == "--help") && o.Value == true {
 				return strings.Trim(doc, "\n")
 			}
 		}
 	}
 	if version != "" {
 		for _, o := range options {
-			if (o.name == "--version") && o.value == true {
+			if (o.Name == "--version") && o.Value == true {
 				return version
 			}
 		}
